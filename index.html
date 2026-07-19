@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Local KMZ Map Viewer 013</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5" />
+  <title>Local KMZ Map Viewer 020.6 Public Drive No Key</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.6.1/ol.css" />
   <style>
     :root {
@@ -293,12 +293,559 @@
       grid-template-columns: 12px 20px 1fr auto;
     }
 
+
+    /* Version 014: Chrome mobile layout */
+    .mobile-layers-btn,
+    .mobile-sidebar-close {
+      display: none;
+    }
+
+    @media (max-width: 760px) {
+      html, body {
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
+        overscroll-behavior: none;
+        touch-action: manipulation;
+      }
+
+      #map {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+      }
+
+      .mobile-layers-btn {
+        display: inline-flex;
+        position: fixed;
+        left: max(10px, env(safe-area-inset-left));
+        bottom: max(14px, env(safe-area-inset-bottom));
+        z-index: 90;
+        align-items: center;
+        gap: 7px;
+        min-height: 44px;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 22px;
+        background: #fff;
+        color: #3c4043;
+        box-shadow: 0 2px 10px rgba(0,0,0,.35);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: 0;
+        width: 100vw;
+        height: min(72dvh, 620px);
+        max-height: calc(100dvh - 72px);
+        border-radius: 14px 14px 0 0;
+        box-shadow: 0 -4px 18px rgba(0,0,0,.34);
+        transform: translateY(105%);
+        transition: transform .22s ease;
+        z-index: 100;
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+
+      .sidebar.mobile-open {
+        transform: translateY(0);
+      }
+
+      .map-head {
+        min-height: 58px;
+        padding: 12px 54px 8px 14px;
+        cursor: default;
+      }
+
+      .map-head::before {
+        content: "";
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 42px;
+        height: 4px;
+        border-radius: 3px;
+        background: #c9c9c9;
+      }
+
+      .map-head h1 {
+        margin-top: 4px;
+        font-size: 16px;
+      }
+
+      .map-head p {
+        font-size: 10px;
+      }
+
+      .dots {
+        display: none;
+      }
+
+      .mobile-sidebar-close {
+        display: block;
+        position: absolute;
+        top: 15px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        border: 0;
+        border-radius: 18px;
+        background: #f1f3f4;
+        font-size: 22px;
+        z-index: 2;
+      }
+
+      .actionbar {
+        gap: 12px;
+        padding: 9px 12px;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .uploadbar,
+      .layer-expandbar {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .uploadbar label,
+      .uploadbar button,
+      .layer-expandbar button {
+        min-height: 42px;
+      }
+
+      .layers {
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 12px;
+      }
+
+      .folder-title {
+        min-height: 48px;
+      }
+
+      .searchbox {
+        position: fixed;
+        left: max(8px, env(safe-area-inset-left));
+        right: max(58px, env(safe-area-inset-right));
+        top: max(8px, env(safe-area-inset-top));
+        width: auto;
+        height: 44px;
+        grid-template-columns: 1fr 48px;
+        border-radius: 4px;
+        overflow: hidden;
+        z-index: 60;
+      }
+
+      .searchbox input {
+        min-width: 0;
+        font-size: 14px;
+        padding: 0 11px;
+      }
+
+      .searchbox button {
+        font-size: 18px;
+      }
+
+      .tools {
+        position: fixed;
+        left: max(8px, env(safe-area-inset-left));
+        right: 8px;
+        top: calc(max(8px, env(safe-area-inset-top)) + 52px);
+        width: auto;
+        max-width: calc(100vw - 16px);
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 2px 0 5px;
+        scrollbar-width: none;
+        z-index: 55;
+      }
+
+      .tools::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tools button {
+        flex: 0 0 42px;
+        width: 42px;
+        height: 40px;
+        font-size: 17px;
+      }
+
+      .map-control-panel {
+        position: fixed;
+        right: max(8px, env(safe-area-inset-right));
+        top: calc(max(8px, env(safe-area-inset-top)) + 104px);
+        z-index: 54;
+      }
+
+      .map-control-panel button {
+        width: 42px;
+        height: 42px;
+      }
+
+      .status-legend {
+        position: fixed;
+        right: max(8px, env(safe-area-inset-right));
+        top: auto;
+        bottom: calc(max(14px, env(safe-area-inset-bottom)) + 58px);
+        width: min(245px, calc(100vw - 24px));
+        max-height: 44dvh;
+        overflow: auto;
+        z-index: 65;
+      }
+
+      .legend-toggle-floating {
+        position: fixed;
+        right: max(8px, env(safe-area-inset-right));
+        top: auto;
+        bottom: calc(max(14px, env(safe-area-inset-bottom)) + 58px);
+        width: 44px;
+        height: 44px;
+        z-index: 64;
+      }
+
+      .basemap {
+        position: fixed;
+        right: max(8px, env(safe-area-inset-right));
+        bottom: max(14px, env(safe-area-inset-bottom));
+        display: flex;
+        padding: 4px;
+        z-index: 62;
+      }
+
+      .basemap button {
+        min-height: 38px;
+        padding: 6px 10px;
+      }
+
+      .basemap-gallery {
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        bottom: calc(max(14px, env(safe-area-inset-bottom)) + 55px);
+        width: auto;
+        max-height: 58dvh;
+        border-radius: 8px;
+        z-index: 110;
+      }
+
+      .status,
+      .coord-box {
+        display: none;
+      }
+
+      .popup {
+        min-width: 0;
+        width: min(90vw, 360px);
+        max-width: 90vw;
+        max-height: 55dvh;
+        overflow: auto;
+      }
+
+      .modal {
+        width: calc(100vw - 20px);
+        max-height: 88dvh;
+        padding: 14px;
+      }
+
+      .field-row {
+        grid-template-columns: 1fr;
+        gap: 5px;
+      }
+
+      .ol-zoom {
+        top: 108px;
+        left: 8px;
+      }
+
+      .ol-attribution {
+        max-width: 70vw;
+        font-size: 9px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .searchbox {
+        right: 52px;
+      }
+
+      .tools button {
+        flex-basis: 39px;
+        width: 39px;
+      }
+
+      .actionbar {
+        gap: 8px;
+      }
+    }
+
+
+    .tools button.active,
+    .map-control-panel button.active {
+      background: #dce9ff;
+      box-shadow: inset 0 0 0 2px #4285f4;
+    }
+
+    .measure-static {
+      background: rgba(0,0,0,.78);
+      color: #fff;
+      padding: 4px 7px;
+      border-radius: 3px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+
+    .markup-toolbar {
+      position: absolute;
+      top: 56px;
+      left: 360px;
+      z-index: 43;
+      display: flex;
+      flex-wrap: wrap;
+      max-width: min(760px, calc(100vw - 450px));
+      gap: 3px;
+      padding: 5px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid #cfcfcf;
+      box-shadow: 0 1px 5px rgba(0,0,0,.24);
+    }
+
+    .markup-toolbar button {
+      width: 34px;
+      height: 32px;
+      border: 1px solid #d1d1d1;
+      background: #fff;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .markup-toolbar button.active {
+      background: #dce9ff;
+      box-shadow: inset 0 0 0 2px #4285f4;
+    }
+
+    .markup-style-panel {
+      position: absolute;
+      top: 97px;
+      left: 360px;
+      z-index: 42;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 8px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid #d1d1d1;
+      box-shadow: 0 1px 4px rgba(0,0,0,.18);
+      font-size: 11px;
+    }
+
+    .markup-style-panel input[type="color"] {
+      width: 28px;
+      height: 26px;
+      padding: 0;
+      border: 1px solid #aaa;
+    }
+
+    .markup-style-panel input[type="range"] {
+      width: 72px;
+    }
+
+    .markup-style-panel select {
+      height: 27px;
+      font-size: 11px;
+    }
+
+    .label-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 8px 7px 30px;
+      font-size: 11px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .label-toggle-row input {
+      margin: 0;
+    }
+
+    .markup-text-label {
+      font: 600 14px Arial;
+      fill: #202124;
+      stroke: #fff;
+      stroke-width: 3px;
+    }
+
+    @media (max-width: 760px) {
+      .markup-toolbar {
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        top: calc(max(8px, env(safe-area-inset-top)) + 101px);
+        max-width: none;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        z-index: 70;
+      }
+
+      .markup-toolbar button {
+        flex: 0 0 42px;
+        width: 42px;
+        height: 40px;
+      }
+
+      .markup-style-panel {
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        top: calc(max(8px, env(safe-area-inset-top)) + 148px);
+        overflow-x: auto;
+        z-index: 69;
+      }
+    }
+
+
+    .sidebar.panel-hidden { display: none; }
+
+    .layers-toggle-desktop {
+      position: absolute;
+      top: 10px;
+      right: 42px;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,.16);
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 5;
+    }
+
+    .layers-toggle-desktop:hover { background: rgba(255,255,255,.28); }
+    .mobile-layers-btn.force-visible { display: block !important; }
+
+    @media (min-width: 761px) {
+      .mobile-layers-btn {
+        position: fixed;
+        left: 12px;
+        bottom: 14px;
+        top: auto;
+        z-index: 80;
+      }
+      body:not(.layers-panel-hidden) .mobile-layers-btn { display: none; }
+      body.layers-panel-hidden .mobile-layers-btn { display: block; }
+    }
+
+
+    .window-manager-btn {
+      position: fixed;
+      right: 10px;
+      top: 10px;
+      z-index: 120;
+      min-width: 38px;
+      height: 36px;
+      border: 1px solid #c9c9c9;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.24);
+      cursor: pointer;
+      font-size: 17px;
+    }
+
+    .window-manager {
+      position: fixed;
+      right: 10px;
+      top: 52px;
+      z-index: 121;
+      width: 230px;
+      max-height: calc(100vh - 65px);
+      overflow: auto;
+      background: #fff;
+      border: 1px solid #c9c9c9;
+      box-shadow: 0 4px 15px rgba(0,0,0,.3);
+      padding: 10px;
+      display: none;
+    }
+
+    .window-manager.open { display: block; }
+
+    .window-manager-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .window-manager-header button {
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .window-manager label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 2px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .ui-window-hidden { display: none !important; }
+
+    @media (max-width: 760px) {
+      .window-manager-btn {
+        right: 8px;
+        top: 8px;
+      }
+      .window-manager {
+        right: 8px;
+        top: 50px;
+        width: min(250px, calc(100vw - 16px));
+      }
+    }
+
 </style>
 </head>
 <body>
   <div id="map"></div>
 
-  <aside class="sidebar">
+  <button id="windowManagerBtn" class="window-manager-btn"
+    type="button" title="Show or hide windows">▣</button>
+
+  <div id="windowManager" class="window-manager" aria-label="Window visibility">
+    <div class="window-manager-header">
+      <span>Show / Hide Windows</span>
+      <button id="windowManagerClose" type="button">×</button>
+    </div>
+    <label><input type="checkbox" data-window-target="sidebar" checked> Layers window</label>
+    <label><input type="checkbox" data-window-target="searchbox" checked> Search window</label>
+    <label><input type="checkbox" data-window-target="topTools" checked> Top navigation tools</label>
+    <label><input type="checkbox" data-window-target="markupToolbar" checked> Drawing toolbar</label>
+    <label><input type="checkbox" data-window-target="markupStyle" checked> Drawing style window</label>
+    <label><input type="checkbox" data-window-target="mapControls" checked> Right-side tools</label>
+    <label><input type="checkbox" data-window-target="statusLegend" checked> Construction legend</label>
+    <label><input type="checkbox" data-window-target="basemapSwitch" checked> Satellite / Map switch</label>
+    <label><input type="checkbox" data-window-target="coordinates" checked> Coordinates</label>
+    <label><input type="checkbox" data-window-target="statusMessage" checked> Status messages</label>
+  </div>
+
+
+  <button id="mobileLayersBtn" class="mobile-layers-btn" type="button">☰ Layers</button>
+
+  <aside id="sidebar" class="sidebar">
+    <button id="mobileSidebarClose" class="mobile-sidebar-close" type="button" aria-label="Close layers">×</button>
+    <button id="desktopSidebarToggle" class="layers-toggle-desktop" type="button"
+      title="Hide layer window" aria-label="Hide layer window">◀</button>
     <div class="map-head">
       <h1>Track alignment - Slab IDs2</h1>
       <p id="viewCount">0 views</p>
@@ -308,6 +855,8 @@
 
     <div class="actionbar">
       <button id="addLayerBtn">◆ Add layer</button>
+      <button id="openDriveFolderBtn" type="button">☁ Open Drive</button>
+      <button id="reloadDriveBtn" type="button">↻ Reload Drive</button>
       <button>↗ Share</button>
       <button class="preview">◉ Preview</button>
     </div>
@@ -334,14 +883,14 @@
   </div>
 
   <div class="tools">
-    <button title="Undo">↶</button>
-    <button title="Redo">↷</button>
-    <button title="Select">↖</button>
-    <button title="Pan">✋</button>
-    <button title="Add marker">📍</button>
-    <button title="Draw line">⌁</button>
-    <button title="Directions">↗</button>
-    <button title="Measure">📏</button>
+    <button id="undoDrawBtn" title="Undo last drawing">↶</button>
+    <button id="clearDrawBtn" title="Clear drawings">↷</button>
+    <button id="selectToolBtn" title="Select features">↖</button>
+    <button id="panToolBtn" title="Pan map">✋</button>
+    <button id="topDrawPointBtn" title="Add marker">📍</button>
+    <button id="topDrawLineBtn" title="Draw line">⌁</button>
+    <button id="zoomAllToolBtn" title="Fit all layers">↗</button>
+    <button id="topMeasureBtn" title="Measure distance">📏</button>
   </div>
 
   <div class="basemap">
@@ -357,874 +906,152 @@
     <div id="popupContent"></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/ol@10.6.1/dist/ol.js">
-    // ---------------- Advanced GIS / My Maps features ----------------
-    const drawnSource = new ol.source.Vector();
-    const drawnLayer = new ol.layer.Vector({
-      source: drawnSource,
-      style: new ol.style.Style({
-        stroke: new ol.style.Stroke({ color: '#ff5722', width: 3 }),
-        fill: new ol.style.Fill({ color: 'rgba(255,87,34,.2)' }),
-        image: new ol.style.Circle({
-          radius: 7,
-          fill: new ol.style.Fill({ color: '#ff5722' }),
-          stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
-        })
-      })
-    });
-    map.addLayer(drawnLayer);
+  <script src="https://cdn.jsdelivr.net/npm/ol@10.6.1/dist/ol.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+  <div class="markup-toolbar" id="markupToolbar" aria-label="Markup tools">
+    <button id="mkSelect" title="Select and move (S)">⬚</button>
+    <button id="mkModify" title="Edit vertices (V)">⌘</button>
+    <button id="mkPoint" title="Point / pin (P)">📍</button>
+    <button id="mkLine" title="Polyline (L)">╱</button>
+    <button id="mkPolygon" title="Polygon (G)">⬡</button>
+    <button id="mkRectangle" title="Rectangle (R)">▭</button>
+    <button id="mkCircle" title="Circle (C)">○</button>
+    <button id="mkFreehand" title="Freehand pencil (F)">✎</button>
+    <button id="mkArrow" title="Arrow (A)">➜</button>
+    <button id="mkText" title="Text annotation (T)">T</button>
+    <button id="mkCloud" title="Revision cloud">☁</button>
+    <button id="mkMeasureDistance" title="Measure distance (M)">📏</button>
+    <button id="mkMeasureArea" title="Measure area">㎡</button>
+    <button id="mkDuplicate" title="Duplicate selected (Ctrl+D)">⧉</button>
+    <button id="mkDelete" title="Delete selected (Delete)">⌫</button>
+    <button id="mkUndo" title="Undo (Ctrl+Z)">↶</button>
+    <button id="mkRedo" title="Redo (Ctrl+Y)">↷</button>
+    <button id="mkSave" title="Save markup locally">💾</button>
+    <button id="mkLoad" title="Load saved markup">↥</button>
+    <button id="mkExport" title="Export markup GeoJSON">⇩</button>
+    <button id="mkClear" title="Clear all markup">🗑</button>
+  </div>
+
+  <div class="markup-style-panel">
+    <label>Stroke <input id="mkStroke" type="color" value="#ff0000"></label>
+    <label>Fill <input id="mkFill" type="color" value="#ff0000"></label>
+    <label>Width <input id="mkWidth" type="range" min="1" max="12" value="3"></label>
+    <label>Opacity <input id="mkOpacity" type="range" min="10" max="100" value="35"></label>
+    <label>Line
+      <select id="mkDash">
+        <option value="solid">Solid</option>
+        <option value="dash">Dashed</option>
+        <option value="dot">Dotted</option>
+      </select>
+    </label>
+    <label>Font <input id="mkFontSize" type="range" min="10" max="32" value="16"></label>
+  </div>
+
+  <div class="map-control-panel">
+    <button id="styleBtn" title="Layer style">🎨</button>
+    <button id="measureBtn" title="Measure distance">📏</button>
+    <button id="drawPointBtn" title="Draw point">📍</button>
+    <button id="drawLineBtn" title="Draw line">／</button>
+    <button id="drawPolyBtn" title="Draw polygon">⬡</button>
+    <button id="exportBtn" title="Export visible data">⇩</button>
+    <button id="baseGalleryBtn" title="Basemaps">🗺</button>
+  </div>
+
+  <div id="coordBox" class="coord-box">Lat: — &nbsp; Lon: —</div>
+
+  <div id="baseGallery" class="basemap-gallery">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <strong style="font-size:13px;">Base map</strong>
+      <button id="closeBaseGallery" style="border:0;background:transparent;cursor:pointer;">×</button>
+    </div>
+    <div class="basemap-grid" id="basemapGrid"></div>
+  </div>
+
+  <div id="styleModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <h2>Layer style</h2>
+      <div class="modal-grid">
+        <div class="field-row">
+          <label>Layer</label>
+          <select id="styleLayerSelect"></select>
+        </div>
+        <div class="field-row">
+          <label>Group places by</label>
+          <select id="groupBySelect"></select>
+        </div>
+        <div class="field-row">
+          <label>Grouping mode</label>
+          <select id="groupModeSelect">
+            <option value="categories">Categories</option>
+            <option value="ranges">Ranges</option>
+            <option value="uniform">Uniform</option>
+            <option value="individual">Individual styles</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label>Set labels</label>
+          <select id="labelFieldSelect"></select>
+        </div>
+        <div class="field-row">
+          <label>Label size</label>
+          <input id="labelSizeInput" type="range" min="9" max="22" value="12" />
+        </div>
+        <div class="field-row">
+          <label>Line / marker size</label>
+          <input id="symbolSizeInput" type="range" min="3" max="14" value="7" />
+        </div>
+        <div class="field-row">
+          <label>Opacity</label>
+          <input id="opacityInput" type="range" min="10" max="100" value="100" />
+        </div>
+        <div class="field-row">
+          <label>Filter expression</label>
+          <input id="filterInput" placeholder="Example: StatusA=7 or Type=WSD" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="styleCancelBtn">Cancel</button>
+        <button id="styleApplyBtn" class="primary">Apply</button>
+      </div>
+    </div>
+  </div>
+
+
+  <button id="legendShowBtn" class="legend-toggle-floating" title="Show legend">☷</button>
+
+  <section id="statusLegend" class="status-legend" aria-label="Construction status legend">
+    <div class="legend-header">
+      <span>Construction Status</span>
+      <button id="legendCollapseBtn" title="Collapse legend">−</button>
+      <button id="legendHideBtn" title="Hide legend">×</button>
+    </div>
+    <div class="legend-body">
+      <div class="legend-item">
+        <span class="legend-swatch legend-grey"></span>
+        <span>Grey - N/A</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch legend-yellow"></span>
+        <span>Yellow - Formwork Completed</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch legend-orange"></span>
+        <span>Orange - Rebar Installed</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch legend-green"></span>
+        <span>Green - Concrete In Situ</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch legend-blue"></span>
+        <span>Blue - Rail Installed</span>
+      </div>
+    </div>
+  </section>
 
-    let drawInteraction = null;
-    let measureTooltip = null;
 
-    function stopActiveInteraction() {
-      if (drawInteraction) {
-        map.removeInteraction(drawInteraction);
-        drawInteraction = null;
-      }
-      if (measureTooltip) {
-        map.removeOverlay(measureTooltip);
-        measureTooltip = null;
-      }
-    }
 
-    function startDraw(type, measure=false) {
-      stopActiveInteraction();
-      drawInteraction = new ol.interaction.Draw({
-        source: drawnSource,
-        type
-      });
-      map.addInteraction(drawInteraction);
-
-      if (measure) {
-        const tooltipEl = document.createElement('div');
-        tooltipEl.style.cssText = 'background:rgba(0,0,0,.75);color:#fff;padding:4px 7px;border-radius:3px;font-size:11px;';
-        measureTooltip = new ol.Overlay({
-          element: tooltipEl,
-          offset: [0,-10],
-          positioning: 'bottom-center'
-        });
-        map.addOverlay(measureTooltip);
-
-        drawInteraction.on('drawstart', evt => {
-          evt.feature.getGeometry().on('change', e => {
-            const geom = e.target;
-            let output = '';
-            if (geom instanceof ol.geom.LineString) {
-              const length = ol.sphere.getLength(geom);
-              output = length > 1000 ? `${(length/1000).toFixed(2)} km` : `${length.toFixed(1)} m`;
-              measureTooltip.setPosition(geom.getLastCoordinate());
-            }
-            tooltipEl.textContent = output;
-          });
-        });
-      }
-
-      drawInteraction.on('drawend', () => {
-        stopActiveInteraction();
-      });
-    }
-
-    function allFieldNames(layer) {
-      const fields = new Set(['name','Name']);
-      layer.getSource().getFeatures().forEach(f => {
-        Object.keys(f.getProperties()).forEach(k => {
-          if (k !== 'geometry' && typeof f.get(k) !== 'object') fields.add(k);
-        });
-      });
-      return [...fields];
-    }
-
-    function populateStyleModal() {
-      const layerSelect = document.getElementById('styleLayerSelect');
-      layerSelect.innerHTML = '';
-      uploaded.forEach((layer, i) => {
-        const o = document.createElement('option');
-        o.value = i;
-        o.textContent = layer.get('fileName');
-        layerSelect.appendChild(o);
-      });
-      refreshStyleFields();
-    }
-
-    function refreshStyleFields() {
-      const idx = Number(document.getElementById('styleLayerSelect').value || 0);
-      const layer = uploaded[idx];
-      if (!layer) return;
-
-      const fields = allFieldNames(layer);
-      const group = document.getElementById('groupBySelect');
-      const labels = document.getElementById('labelFieldSelect');
-      group.innerHTML = '<option value="">None</option>';
-      labels.innerHTML = '<option value="">No labels</option>';
-
-      fields.forEach(field => {
-        const o1 = document.createElement('option');
-        o1.value = field; o1.textContent = field;
-        group.appendChild(o1);
-
-        const o2 = document.createElement('option');
-        o2.value = field; o2.textContent = field;
-        labels.appendChild(o2);
-      });
-
-      group.value = layer.get('styleField') || '';
-      labels.value = layer.get('labelField') || (fields.includes('Name') ? 'Name' : (fields.includes('name') ? 'name' : ''));
-      document.getElementById('groupModeSelect').value = layer.get('styleMode') === 'attribute' ? 'categories' : (layer.get('styleMode') || 'uniform');
-      document.getElementById('labelSizeInput').value = layer.get('labelSize') || 12;
-      document.getElementById('symbolSizeInput').value = layer.get('symbolSize') || 7;
-      document.getElementById('opacityInput').value = Math.round((layer.getOpacity() || 1) * 100);
-      document.getElementById('filterInput').value = layer.get('filterExpression') || '';
-    }
-
-    function parseFilter(expr) {
-      const m = String(expr || '').match(/^\s*([^=<>!]+)\s*=\s*(.+?)\s*$/);
-      if (!m) return null;
-      return { field: m[1].trim(), value: m[2].trim() };
-    }
-
-    function makeDynamicStyle(layer) {
-      const field = layer.get('styleField');
-      const mode = layer.get('styleMode') || 'uniform';
-      const labelField = layer.get('labelField') || 'Name';
-      const labelSize = Number(layer.get('labelSize') || 12);
-      const symbolSize = Number(layer.get('symbolSize') || 7);
-      const filter = parseFilter(layer.get('filterExpression'));
-      const features = layer.getSource().getFeatures();
-
-      let categories = [];
-      let numeric = false;
-      let min = null, max = null;
-
-      if (field) {
-        const vals = features.map(f => f.get(field)).filter(v => v !== null && v !== undefined && v !== '');
-        numeric = vals.length > 0 && vals.every(v => Number.isFinite(Number(v)));
-        categories = [...new Set(vals.map(v => numeric ? Number(v) : String(v)))];
-        categories.sort(numeric ? ((a,b)=>a-b) : ((a,b)=>String(a).localeCompare(String(b), undefined, {numeric:true})));
-        if (numeric && categories.length) { min = Math.min(...categories); max = Math.max(...categories); }
-      }
-
-      const catMap = new Map();
-      categories.forEach((v,i) => catMap.set(String(v), numeric ? numericColor(Number(v), min, max) : categoryPalette(i)));
-
-      return feature => {
-        if (filter && String(feature.get(filter.field)) !== filter.value) return null;
-
-        let color = layer.get('color') || '#4285f4';
-        if (mode === 'attribute' || mode === 'categories' || mode === 'ranges') {
-          const raw = feature.get(field);
-          color = raw === null || raw === undefined || raw === '' ? '#9e9e9e' : (catMap.get(String(numeric ? Number(raw) : raw)) || '#9e9e9e');
-        }
-
-        const label = feature.get(labelField) || '';
-        const type = feature.getGeometry()?.getType();
-        const text = label ? new ol.style.Text({
-          text: String(label),
-          font: `${labelSize}px Arial`,
-          fill: new ol.style.Fill({color:'#222'}),
-          stroke: new ol.style.Stroke({color:'#fff', width:3}),
-          offsetY: (type === 'Point' || type === 'MultiPoint') ? -(symbolSize + 8) : 0,
-          placement: (type === 'LineString' || type === 'MultiLineString') ? 'line' : 'point',
-          overflow: true
-        }) : undefined;
-
-        if (type === 'Point' || type === 'MultiPoint') {
-          return new ol.style.Style({
-            image: new ol.style.Circle({
-              radius: symbolSize,
-              fill: new ol.style.Fill({color}),
-              stroke: new ol.style.Stroke({color:'#fff', width:2})
-            }),
-            text
-          });
-        }
-
-        if (type === 'LineString' || type === 'MultiLineString') {
-          return new ol.style.Style({
-            stroke: new ol.style.Stroke({color, width: Math.max(2, symbolSize/1.5)}),
-            text
-          });
-        }
-
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({color, width:2}),
-          fill: new ol.style.Fill({color:rgba(color,.3)}),
-          text
-        });
-      };
-    }
-
-    function applyStyleSettings() {
-      const idx = Number(document.getElementById('styleLayerSelect').value || 0);
-      const layer = uploaded[idx];
-      if (!layer) return;
-
-      const groupField = document.getElementById('groupBySelect').value;
-      let mode = document.getElementById('groupModeSelect').value;
-      if (groupField && mode === 'categories') mode = 'attribute';
-
-      layer.set('styleField', groupField || null);
-      layer.set('styleMode', mode);
-      layer.set('labelField', document.getElementById('labelFieldSelect').value || null);
-      layer.set('labelSize', Number(document.getElementById('labelSizeInput').value));
-      layer.set('symbolSize', Number(document.getElementById('symbolSizeInput').value));
-      layer.set('filterExpression', document.getElementById('filterInput').value.trim());
-      layer.setOpacity(Number(document.getElementById('opacityInput').value)/100);
-      layer.setStyle(makeDynamicStyle(layer));
-
-      localStorage.setItem('kmzViewerStyleSettings', JSON.stringify(
-        uploaded.map(l => ({
-          fileName:l.get('fileName'),
-          styleField:l.get('styleField'),
-          styleMode:l.get('styleMode'),
-          labelField:l.get('labelField'),
-          labelSize:l.get('labelSize'),
-          symbolSize:l.get('symbolSize'),
-          opacity:l.getOpacity(),
-          filterExpression:l.get('filterExpression')
-        }))
-      ));
-
-      document.getElementById('styleModalBackdrop').classList.remove('open');
-      status(`Updated style for ${layer.get('fileName')}.`);
-    }
-
-    document.getElementById('styleBtn').onclick = () => {
-      if (!uploaded.length) { status('Load at least one KMZ/KML layer first.'); return; }
-      populateStyleModal();
-      document.getElementById('styleModalBackdrop').classList.add('open');
-    };
-    document.getElementById('styleLayerSelect').onchange = refreshStyleFields;
-    document.getElementById('styleCancelBtn').onclick = () => document.getElementById('styleModalBackdrop').classList.remove('open');
-    document.getElementById('styleApplyBtn').onclick = applyStyleSettings;
-
-    document.getElementById('measureBtn').onclick = () => startDraw('LineString', true);
-    document.getElementById('drawPointBtn').onclick = () => startDraw('Point');
-    document.getElementById('drawLineBtn').onclick = () => startDraw('LineString');
-    document.getElementById('drawPolyBtn').onclick = () => startDraw('Polygon');
-
-    document.getElementById('exportBtn').onclick = () => {
-      const features = [];
-      uploaded.filter(l => l.getVisible()).forEach(l => features.push(...l.getSource().getFeatures()));
-      features.push(...drawnSource.getFeatures());
-
-      const geojson = new ol.format.GeoJSON().writeFeatures(features, {
-        featureProjection: map.getView().getProjection(),
-        dataProjection: 'EPSG:4326'
-      });
-      const blob = new Blob([geojson], {type:'application/geo+json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'local_kmz_map_export.geojson';
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-
-    const hybridLabels = new ol.layer.Tile({
-      source:new ol.source.XYZ({
-        attributions:'Labels © Esri',
-        url:'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'
-      }),
-      visible:false
-    });
-
-    const extraBaseLayers = {
-      satellite,
-      osm,
-      topo: new ol.layer.Tile({
-        source:new ol.source.XYZ({
-          attributions:'Tiles © Esri',
-          url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
-        }),
-        visible:false
-      }),
-      streets: new ol.layer.Tile({
-        source:new ol.source.XYZ({
-          attributions:'Tiles © Esri',
-          url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'
-        }),
-        visible:false
-      }),
-      light: new ol.layer.Tile({
-        source:new ol.source.XYZ({
-          attributions:'© OpenStreetMap © CARTO',
-          url:'https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
-        }),
-        visible:false
-      }),
-      dark: new ol.layer.Tile({
-        source:new ol.source.XYZ({
-          attributions:'© OpenStreetMap © CARTO',
-          url:'https://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-        }),
-        visible:false
-      })
-    };
-
-    Object.entries(extraBaseLayers).forEach(([k,l]) => {
-      if (!map.getLayers().getArray().includes(l)) map.getLayers().insertAt(0,l);
-    });
-
-    if (!map.getLayers().getArray().includes(hybridLabels)) {
-      map.getLayers().insertAt(1, hybridLabels);
-    }
-
-    const baseDefs = [
-      ['hybrid','Hybrid + street names','https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/13/2899/2165'],
-      ['satellite','Satellite','https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/13/2899/2165'],
-      ['streets','Street map','https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/13/2899/2165'],
-      ['osm','OpenStreetMap','https://tile.openstreetmap.org/13/1510/2645.png'],
-      ['topo','Topographic','https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/13/2899/2165'],
-      ['light','Light','https://a.basemaps.cartocdn.com/light_all/13/1510/2645.png'],
-      ['dark','Dark','https://a.basemaps.cartocdn.com/dark_all/13/1510/2645.png']
-    ];
-
-    function setBaseMap(key) {
-      Object.entries(extraBaseLayers).forEach(([k,l]) => l.setVisible(false));
-      hybridLabels.setVisible(false);
-
-      if (key === 'hybrid') {
-        satellite.setVisible(true);
-        hybridLabels.setVisible(true);
-      } else if (extraBaseLayers[key]) {
-        extraBaseLayers[key].setVisible(true);
-      } else {
-        satellite.setVisible(true);
-        key = 'satellite';
-      }
-
-      localStorage.setItem('kmzViewerBaseMap', key);
-      document.querySelectorAll('.basemap-card').forEach(c => c.classList.toggle('active', c.dataset.key === key));
-    }
-
-    const baseGrid = document.getElementById('basemapGrid');
-    baseDefs.forEach(([key,label,thumb]) => {
-      const card = document.createElement('div');
-      card.className = 'basemap-card';
-      card.dataset.key = key;
-      card.innerHTML = `<div class="basemap-thumb" style="background-image:url('${thumb}')"></div><div class="basemap-label">${label}</div>`;
-      card.onclick = () => setBaseMap(key);
-      baseGrid.appendChild(card);
-    });
-
-    document.getElementById('baseGalleryBtn').onclick = () => document.getElementById('baseGallery').classList.toggle('open');
-    document.getElementById('closeBaseGallery').onclick = () => document.getElementById('baseGallery').classList.remove('open');
-
-    const savedBase = localStorage.getItem('kmzViewerBaseMap') || 'hybrid';
-    setBaseMap(savedBase);
-
-    map.on('pointermove', evt => {
-      const lonlat = ol.proj.toLonLat(evt.coordinate);
-      document.getElementById('coordBox').textContent = `Lat: ${lonlat[1].toFixed(6)}   Lon: ${lonlat[0].toFixed(6)}`;
-    });
-
-    document.addEventListener('keydown', e => {
-      if (e.key.toLowerCase() === 'b') document.getElementById('baseGallery').classList.toggle('open');
-      if (e.key === 'Escape') {
-        stopActiveInteraction();
-        document.getElementById('styleModalBackdrop').classList.remove('open');
-        document.getElementById('baseGallery').classList.remove('open');
-      }
-    });
-
-
-    // ---------------- Construction status legend ----------------
-    const statusLegend = document.getElementById('statusLegend');
-    const legendShowBtn = document.getElementById('legendShowBtn');
-    const legendCollapseBtn = document.getElementById('legendCollapseBtn');
-    const legendHideBtn = document.getElementById('legendHideBtn');
-
-    function saveLegendState() {
-      localStorage.setItem('kmzViewerLegendState', JSON.stringify({
-        hidden: statusLegend.style.display === 'none',
-        collapsed: statusLegend.classList.contains('collapsed')
-      }));
-    }
-
-    function restoreLegendState() {
-      try {
-        const saved = JSON.parse(localStorage.getItem('kmzViewerLegendState') || '{}');
-
-        if (saved.hidden) {
-          statusLegend.style.display = 'none';
-          legendShowBtn.style.display = 'block';
-        }
-
-        if (saved.collapsed) {
-          statusLegend.classList.add('collapsed');
-          legendCollapseBtn.textContent = '+';
-          legendCollapseBtn.title = 'Expand legend';
-        }
-      } catch {}
-    }
-
-    legendCollapseBtn.onclick = () => {
-      statusLegend.classList.toggle('collapsed');
-      const collapsed = statusLegend.classList.contains('collapsed');
-      legendCollapseBtn.textContent = collapsed ? '+' : '−';
-      legendCollapseBtn.title = collapsed ? 'Expand legend' : 'Collapse legend';
-      saveLegendState();
-    };
-
-    legendHideBtn.onclick = () => {
-      statusLegend.style.display = 'none';
-      legendShowBtn.style.display = 'block';
-      saveLegendState();
-    };
-
-    legendShowBtn.onclick = () => {
-      statusLegend.style.display = 'block';
-      legendShowBtn.style.display = 'none';
-      saveLegendState();
-    };
-
-    restoreLegendState();
-
-
-    function setAllFoldersExpanded(expanded) {
-      const folders = [...document.querySelectorAll('.folder')];
-      folders.forEach(folder => {
-        const body = folder.querySelector('.folder-body');
-        const fileName = folder.dataset.fileName;
-        const layer = uploaded.find(item => item.get('fileName') === fileName);
-        if (body && layer) setFolderExpanded(folder, body, expanded, layer);
-      });
-    }
-
-    document.getElementById('expandAllBtn').onclick = () => setAllFoldersExpanded(true);
-    document.getElementById('collapseAllBtn').onclick = () => setAllFoldersExpanded(false);
-
-    document.addEventListener('keydown', event => {
-      if (!event.shiftKey) return;
-      if (event.key.toLowerCase() === 'e') {
-        event.preventDefault();
-        setAllFoldersExpanded(true);
-      }
-      if (event.key.toLowerCase() === 'c') {
-        event.preventDefault();
-        setAllFoldersExpanded(false);
-      }
-    });
-
-</script>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js">
-    // ---------------- Advanced GIS / My Maps features ----------------
-    const drawnSource = new ol.source.Vector();
-    const drawnLayer = new ol.layer.Vector({
-      source: drawnSource,
-      style: new ol.style.Style({
-        stroke: new ol.style.Stroke({ color: '#ff5722', width: 3 }),
-        fill: new ol.style.Fill({ color: 'rgba(255,87,34,.2)' }),
-        image: new ol.style.Circle({
-          radius: 7,
-          fill: new ol.style.Fill({ color: '#ff5722' }),
-          stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
-        })
-      })
-    });
-    map.addLayer(drawnLayer);
-
-    let drawInteraction = null;
-    let measureTooltip = null;
-
-    function stopActiveInteraction() {
-      if (drawInteraction) {
-        map.removeInteraction(drawInteraction);
-        drawInteraction = null;
-      }
-      if (measureTooltip) {
-        map.removeOverlay(measureTooltip);
-        measureTooltip = null;
-      }
-    }
-
-    function startDraw(type, measure=false) {
-      stopActiveInteraction();
-      drawInteraction = new ol.interaction.Draw({
-        source: drawnSource,
-        type
-      });
-      map.addInteraction(drawInteraction);
-
-      if (measure) {
-        const tooltipEl = document.createElement('div');
-        tooltipEl.style.cssText = 'background:rgba(0,0,0,.75);color:#fff;padding:4px 7px;border-radius:3px;font-size:11px;';
-        measureTooltip = new ol.Overlay({
-          element: tooltipEl,
-          offset: [0,-10],
-          positioning: 'bottom-center'
-        });
-        map.addOverlay(measureTooltip);
-
-        drawInteraction.on('drawstart', evt => {
-          evt.feature.getGeometry().on('change', e => {
-            const geom = e.target;
-            let output = '';
-            if (geom instanceof ol.geom.LineString) {
-              const length = ol.sphere.getLength(geom);
-              output = length > 1000 ? `${(length/1000).toFixed(2)} km` : `${length.toFixed(1)} m`;
-              measureTooltip.setPosition(geom.getLastCoordinate());
-            }
-            tooltipEl.textContent = output;
-          });
-        });
-      }
-
-      drawInteraction.on('drawend', () => {
-        stopActiveInteraction();
-      });
-    }
-
-    function allFieldNames(layer) {
-      const fields = new Set(['name','Name']);
-      layer.getSource().getFeatures().forEach(f => {
-        Object.keys(f.getProperties()).forEach(k => {
-          if (k !== 'geometry' && typeof f.get(k) !== 'object') fields.add(k);
-        });
-      });
-      return [...fields];
-    }
-
-    function populateStyleModal() {
-      const layerSelect = document.getElementById('styleLayerSelect');
-      layerSelect.innerHTML = '';
-      uploaded.forEach((layer, i) => {
-        const o = document.createElement('option');
-        o.value = i;
-        o.textContent = layer.get('fileName');
-        layerSelect.appendChild(o);
-      });
-      refreshStyleFields();
-    }
-
-    function refreshStyleFields() {
-      const idx = Number(document.getElementById('styleLayerSelect').value || 0);
-      const layer = uploaded[idx];
-      if (!layer) return;
-
-      const fields = allFieldNames(layer);
-      const group = document.getElementById('groupBySelect');
-      const labels = document.getElementById('labelFieldSelect');
-      group.innerHTML = '<option value="">None</option>';
-      labels.innerHTML = '<option value="">No labels</option>';
-
-      fields.forEach(field => {
-        const o1 = document.createElement('option');
-        o1.value = field; o1.textContent = field;
-        group.appendChild(o1);
-
-        const o2 = document.createElement('option');
-        o2.value = field; o2.textContent = field;
-        labels.appendChild(o2);
-      });
-
-      group.value = layer.get('styleField') || '';
-      labels.value = layer.get('labelField') || (fields.includes('Name') ? 'Name' : (fields.includes('name') ? 'name' : ''));
-      document.getElementById('groupModeSelect').value = layer.get('styleMode') === 'attribute' ? 'categories' : (layer.get('styleMode') || 'uniform');
-      document.getElementById('labelSizeInput').value = layer.get('labelSize') || 12;
-      document.getElementById('symbolSizeInput').value = layer.get('symbolSize') || 7;
-      document.getElementById('opacityInput').value = Math.round((layer.getOpacity() || 1) * 100);
-      document.getElementById('filterInput').value = layer.get('filterExpression') || '';
-    }
-
-    function parseFilter(expr) {
-      const m = String(expr || '').match(/^\s*([^=<>!]+)\s*=\s*(.+?)\s*$/);
-      if (!m) return null;
-      return { field: m[1].trim(), value: m[2].trim() };
-    }
-
-    function makeDynamicStyle(layer) {
-      const field = layer.get('styleField');
-      const mode = layer.get('styleMode') || 'uniform';
-      const labelField = layer.get('labelField') || 'Name';
-      const labelSize = Number(layer.get('labelSize') || 12);
-      const symbolSize = Number(layer.get('symbolSize') || 7);
-      const filter = parseFilter(layer.get('filterExpression'));
-      const features = layer.getSource().getFeatures();
-
-      let categories = [];
-      let numeric = false;
-      let min = null, max = null;
-
-      if (field) {
-        const vals = features.map(f => f.get(field)).filter(v => v !== null && v !== undefined && v !== '');
-        numeric = vals.length > 0 && vals.every(v => Number.isFinite(Number(v)));
-        categories = [...new Set(vals.map(v => numeric ? Number(v) : String(v)))];
-        categories.sort(numeric ? ((a,b)=>a-b) : ((a,b)=>String(a).localeCompare(String(b), undefined, {numeric:true})));
-        if (numeric && categories.length) { min = Math.min(...categories); max = Math.max(...categories); }
-      }
-
-      const catMap = new Map();
-      categories.forEach((v,i) => catMap.set(String(v), numeric ? numericColor(Number(v), min, max) : categoryPalette(i)));
-
-      return feature => {
-        if (filter && String(feature.get(filter.field)) !== filter.value) return null;
-
-        let color = layer.get('color') || '#4285f4';
-        if (mode === 'attribute' || mode === 'categories' || mode === 'ranges') {
-          const raw = feature.get(field);
-          color = raw === null || raw === undefined || raw === '' ? '#9e9e9e' : (catMap.get(String(numeric ? Number(raw) : raw)) || '#9e9e9e');
-        }
-
-        const label = feature.get(labelField) || '';
-        const type = feature.getGeometry()?.getType();
-        const text = label ? new ol.style.Text({
-          text: String(label),
-          font: `${labelSize}px Arial`,
-          fill: new ol.style.Fill({color:'#222'}),
-          stroke: new ol.style.Stroke({color:'#fff', width:3}),
-          offsetY: (type === 'Point' || type === 'MultiPoint') ? -(symbolSize + 8) : 0,
-          placement: (type === 'LineString' || type === 'MultiLineString') ? 'line' : 'point',
-          overflow: true
-        }) : undefined;
-
-        if (type === 'Point' || type === 'MultiPoint') {
-          return new ol.style.Style({
-            image: new ol.style.Circle({
-              radius: symbolSize,
-              fill: new ol.style.Fill({color}),
-              stroke: new ol.style.Stroke({color:'#fff', width:2})
-            }),
-            text
-          });
-        }
-
-        if (type === 'LineString' || type === 'MultiLineString') {
-          return new ol.style.Style({
-            stroke: new ol.style.Stroke({color, width: Math.max(2, symbolSize/1.5)}),
-            text
-          });
-        }
-
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({color, width:2}),
-          fill: new ol.style.Fill({color:rgba(color,.3)}),
-          text
-        });
-      };
-    }
-
-    function applyStyleSettings() {
-      const idx = Number(document.getElementById('styleLayerSelect').value || 0);
-      const layer = uploaded[idx];
-      if (!layer) return;
-
-      const groupField = document.getElementById('groupBySelect').value;
-      let mode = document.getElementById('groupModeSelect').value;
-      if (groupField && mode === 'categories') mode = 'attribute';
-
-      layer.set('styleField', groupField || null);
-      layer.set('styleMode', mode);
-      layer.set('labelField', document.getElementById('labelFieldSelect').value || null);
-      layer.set('labelSize', Number(document.getElementById('labelSizeInput').value));
-      layer.set('symbolSize', Number(document.getElementById('symbolSizeInput').value));
-      layer.set('filterExpression', document.getElementById('filterInput').value.trim());
-      layer.setOpacity(Number(document.getElementById('opacityInput').value)/100);
-      layer.setStyle(makeDynamicStyle(layer));
-
-      localStorage.setItem('kmzViewerStyleSettings', JSON.stringify(
-        uploaded.map(l => ({
-          fileName:l.get('fileName'),
-          styleField:l.get('styleField'),
-          styleMode:l.get('styleMode'),
-          labelField:l.get('labelField'),
-          labelSize:l.get('labelSize'),
-          symbolSize:l.get('symbolSize'),
-          opacity:l.getOpacity(),
-          filterExpression:l.get('filterExpression')
-        }))
-      ));
-
-      document.getElementById('styleModalBackdrop').classList.remove('open');
-      status(`Updated style for ${layer.get('fileName')}.`);
-    }
-
-    document.getElementById('styleBtn').onclick = () => {
-      if (!uploaded.length) { status('Load at least one KMZ/KML layer first.'); return; }
-      populateStyleModal();
-      document.getElementById('styleModalBackdrop').classList.add('open');
-    };
-    document.getElementById('styleLayerSelect').onchange = refreshStyleFields;
-    document.getElementById('styleCancelBtn').onclick = () => document.getElementById('styleModalBackdrop').classList.remove('open');
-    document.getElementById('styleApplyBtn').onclick = applyStyleSettings;
-
-    document.getElementById('measureBtn').onclick = () => startDraw('LineString', true);
-    document.getElementById('drawPointBtn').onclick = () => startDraw('Point');
-    document.getElementById('drawLineBtn').onclick = () => startDraw('LineString');
-    document.getElementById('drawPolyBtn').onclick = () => startDraw('Polygon');
-
-    document.getElementById('exportBtn').onclick = () => {
-      const features = [];
-      uploaded.filter(l => l.getVisible()).forEach(l => features.push(...l.getSource().getFeatures()));
-      features.push(...drawnSource.getFeatures());
-
-      const geojson = new ol.format.GeoJSON().writeFeatures(features, {
-        featureProjection: map.getView().getProjection(),
-        dataProjection: 'EPSG:4326'
-      });
-      const blob = new Blob([geojson], {type:'application/geo+json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'local_kmz_map_export.geojson';
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-
-    const extraBaseLayers = {
-      satellite,
-      osm,
-      topo: new ol.layer.Tile({
-        source:new ol.source.XYZ({
-          attributions:'Tiles © Esri',
-          url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
-        }),
-        visible:false
-      }),
-      light: new ol.layer.Tile({
-        source:new ol.source.XYZ({
-          attributions:'© OpenStreetMap © CARTO',
-          url:'https://{a-c}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
-        }),
-        visible:false
-      }),
-      dark: new ol.layer.Tile({
-        source:new ol.source.XYZ({
-          attributions:'© OpenStreetMap © CARTO',
-          url:'https://{a-c}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-        }),
-        visible:false
-      })
-    };
-    Object.entries(extraBaseLayers).forEach(([k,l]) => {
-      if (!map.getLayers().getArray().includes(l)) map.getLayers().insertAt(0,l);
-    });
-
-    const baseDefs = [
-      ['satellite','Satellite','https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/13/2899/2165'],
-      ['osm','Map','https://tile.openstreetmap.org/13/1510/2645.png'],
-      ['topo','Topographic','https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/13/2899/2165'],
-      ['light','Light','https://a.basemaps.cartocdn.com/light_all/13/1510/2645.png'],
-      ['dark','Dark','https://a.basemaps.cartocdn.com/dark_all/13/1510/2645.png']
-    ];
-
-    function setBaseMap(key) {
-      Object.entries(extraBaseLayers).forEach(([k,l]) => l.setVisible(k === key));
-      localStorage.setItem('kmzViewerBaseMap', key);
-      document.querySelectorAll('.basemap-card').forEach(c => c.classList.toggle('active', c.dataset.key === key));
-    }
-
-    const baseGrid = document.getElementById('basemapGrid');
-    baseDefs.forEach(([key,label,thumb]) => {
-      const card = document.createElement('div');
-      card.className = 'basemap-card';
-      card.dataset.key = key;
-      card.innerHTML = `<div class="basemap-thumb" style="background-image:url('${thumb}')"></div><div class="basemap-label">${label}</div>`;
-      card.onclick = () => setBaseMap(key);
-      baseGrid.appendChild(card);
-    });
-
-    document.getElementById('baseGalleryBtn').onclick = () => document.getElementById('baseGallery').classList.toggle('open');
-    document.getElementById('closeBaseGallery').onclick = () => document.getElementById('baseGallery').classList.remove('open');
-
-    const savedBase = localStorage.getItem('kmzViewerBaseMap') || 'hybrid';
-    setBaseMap(savedBase);
-
-    map.on('pointermove', evt => {
-      const lonlat = ol.proj.toLonLat(evt.coordinate);
-      document.getElementById('coordBox').textContent = `Lat: ${lonlat[1].toFixed(6)}   Lon: ${lonlat[0].toFixed(6)}`;
-    });
-
-    document.addEventListener('keydown', e => {
-      if (e.key.toLowerCase() === 'b') document.getElementById('baseGallery').classList.toggle('open');
-      if (e.key === 'Escape') {
-        stopActiveInteraction();
-        document.getElementById('styleModalBackdrop').classList.remove('open');
-        document.getElementById('baseGallery').classList.remove('open');
-      }
-    });
-
-
-    // ---------------- Construction status legend ----------------
-    const statusLegend = document.getElementById('statusLegend');
-    const legendShowBtn = document.getElementById('legendShowBtn');
-    const legendCollapseBtn = document.getElementById('legendCollapseBtn');
-    const legendHideBtn = document.getElementById('legendHideBtn');
-
-    function saveLegendState() {
-      localStorage.setItem('kmzViewerLegendState', JSON.stringify({
-        hidden: statusLegend.style.display === 'none',
-        collapsed: statusLegend.classList.contains('collapsed')
-      }));
-    }
-
-    function restoreLegendState() {
-      try {
-        const saved = JSON.parse(localStorage.getItem('kmzViewerLegendState') || '{}');
-
-        if (saved.hidden) {
-          statusLegend.style.display = 'none';
-          legendShowBtn.style.display = 'block';
-        }
-
-        if (saved.collapsed) {
-          statusLegend.classList.add('collapsed');
-          legendCollapseBtn.textContent = '+';
-          legendCollapseBtn.title = 'Expand legend';
-        }
-      } catch {}
-    }
-
-    legendCollapseBtn.onclick = () => {
-      statusLegend.classList.toggle('collapsed');
-      const collapsed = statusLegend.classList.contains('collapsed');
-      legendCollapseBtn.textContent = collapsed ? '+' : '−';
-      legendCollapseBtn.title = collapsed ? 'Expand legend' : 'Collapse legend';
-      saveLegendState();
-    };
-
-    legendHideBtn.onclick = () => {
-      statusLegend.style.display = 'none';
-      legendShowBtn.style.display = 'block';
-      saveLegendState();
-    };
-
-    legendShowBtn.onclick = () => {
-      statusLegend.style.display = 'block';
-      legendShowBtn.style.display = 'none';
-      saveLegendState();
-    };
-
-    restoreLegendState();
-
-
-    function setAllFoldersExpanded(expanded) {
-      const folders = [...document.querySelectorAll('.folder')];
-      folders.forEach(folder => {
-        const body = folder.querySelector('.folder-body');
-        const fileName = folder.dataset.fileName;
-        const layer = uploaded.find(item => item.get('fileName') === fileName);
-        if (body && layer) setFolderExpanded(folder, body, expanded, layer);
-      });
-    }
-
-    document.getElementById('expandAllBtn').onclick = () => setAllFoldersExpanded(true);
-    document.getElementById('collapseAllBtn').onclick = () => setAllFoldersExpanded(false);
-
-    document.addEventListener('keydown', event => {
-      if (!event.shiftKey) return;
-      if (event.key.toLowerCase() === 'e') {
-        event.preventDefault();
-        setAllFoldersExpanded(true);
-      }
-      if (event.key.toLowerCase() === 'c') {
-        event.preventDefault();
-        setAllFoldersExpanded(false);
-      }
-    });
-
-</script>
   <script>
     const initialCenter = ol.proj.fromLonLat([-113.6293610793858, 53.529216636355244]);
 
@@ -1318,7 +1145,7 @@
       const numeric = isNumericArray(values);
 
       if (unique <= 1) return -Infinity;
-      if (unique > Math.max(40, totalFeatures * 0.35)) return -Infinity;
+      if (unique > Math.min(60, Math.max(40, totalFeatures * 0.20))) return -Infinity;
 
       let score = 0;
       score += coverage * 30;
@@ -1329,6 +1156,46 @@
       if (/id|number|no\.?|station|length|description|desc/i.test(normalized)) score -= 15;
 
       return score;
+    }
+
+
+    function getAllAttributeFields(features) {
+      const fields = new Set();
+      features.forEach(feature => {
+        Object.keys(feature.getProperties()).forEach(key => {
+          if (key !== 'geometry') fields.add(key);
+        });
+      });
+      return [...fields];
+    }
+
+    function findFieldInsensitive(fields, candidates) {
+      const lookup = new Map(fields.map(field => [String(field).toLowerCase(), field]));
+      for (const candidate of candidates) {
+        const match = lookup.get(String(candidate).toLowerCase());
+        if (match) return match;
+      }
+      return null;
+    }
+
+    function chooseDefaultLabelField(fileName, features) {
+      const fields = getAllAttributeFields(features);
+      const lower = String(fileName || '').toLowerCase();
+
+      if (lower.startsWith('007-') || lower.startsWith('008-')) {
+        return findFieldInsensitive(fields, ['Slab ID', 'SlabID', 'Slab_ID', 'Slab Id'])
+          || findFieldInsensitive(fields, ['Name', 'name']);
+      }
+
+      return findFieldInsensitive(fields, ['Name', 'name', 'TITLE', 'title', 'LABEL', 'Label', 'label'])
+        || null;
+    }
+
+    function applyViewerLabel(features, fieldName) {
+      features.forEach(feature => {
+        const value = fieldName ? feature.get(fieldName) : '';
+        feature.set('_viewerLabel', value === null || value === undefined ? '' : String(value));
+      });
     }
 
     function analyseLayerStyle(features, fileName) {
@@ -1397,7 +1264,9 @@
         const color = categoryMap.get(key) || '#9e9e9e';
         const type = feature.getGeometry()?.getType();
 
-        const label = feature.get('Name') || feature.get('name') || '';
+        // Do not fall back to Name/name here.
+        // An empty _viewerLabel means labels are intentionally hidden.
+        const label = feature.get('_viewerLabel') || '';
 
         if (type === 'Point' || type === 'MultiPoint') {
           return new ol.style.Style({
@@ -1445,7 +1314,9 @@
         const color = numericColor(value, min, max);
         const type = feature.getGeometry()?.getType();
 
-        const label = feature.get('Name') || feature.get('name') || '';
+        // Do not fall back to Name/name here.
+        // An empty _viewerLabel means labels are intentionally hidden.
+        const label = feature.get('_viewerLabel') || '';
 
         if (type === 'Point' || type === 'MultiPoint') {
           return new ol.style.Style({
@@ -1485,41 +1356,53 @@
         });
       };
     }
-    function styleFor(color) {
+    function styleFor(color, showLabels = true) {
+      const cache = new Map();
+
       return feature => {
-        const type = feature.getGeometry()?.getType();
+        const type = feature.getGeometry()?.getType() || 'Unknown';
+        const label = showLabels ? (feature.get('_viewerLabel') || '') : '';
+        const cacheKey = `${type}|${label}`;
+
+        if (cache.has(cacheKey)) return cache.get(cacheKey);
+
+        let style;
+
         if (type === 'Point' || type === 'MultiPoint') {
-          return new ol.style.Style({
+          style = new ol.style.Style({
             image: new ol.style.Circle({
-              radius: 7,
+              radius: showLabels ? 6 : 5,
               fill: new ol.style.Fill({color}),
-              stroke: new ol.style.Stroke({color:'#fff', width:2})
+              stroke: new ol.style.Stroke({color:'#fff', width:1.5})
             }),
-            text: feature.get('name') ? new ol.style.Text({
-              text: String(feature.get('name')),
-              offsetY: -16,
-              font: '12px Arial',
+            text: label ? new ol.style.Text({
+              text: String(label),
+              offsetY: -14,
+              font: '11px Arial',
               fill: new ol.style.Fill({color:'#222'}),
               stroke: new ol.style.Stroke({color:'#fff', width:3})
             }) : undefined
           });
-        }
-        if (type === 'LineString' || type === 'MultiLineString') {
-          return new ol.style.Style({
+        } else if (type === 'LineString' || type === 'MultiLineString') {
+          style = new ol.style.Style({
             stroke: new ol.style.Stroke({color, width:5}),
-            text: feature.get('name') ? new ol.style.Text({
-              text: String(feature.get('name')),
+            text: label ? new ol.style.Text({
+              text: String(label),
               placement: 'line',
               font: '11px Arial',
               fill: new ol.style.Fill({color:'#222'}),
               stroke: new ol.style.Stroke({color:'#fff', width:3})
             }) : undefined
           });
+        } else {
+          style = new ol.style.Style({
+            stroke: new ol.style.Stroke({color, width:2}),
+            fill: new ol.style.Fill({color:rgba(color,.25)})
+          });
         }
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({color, width:2}),
-          fill: new ol.style.Fill({color:rgba(color,.25)})
-        });
+
+        cache.set(cacheKey, style);
+        return style;
       };
     }
 
@@ -1536,18 +1419,87 @@
       try {
         status(`Loading ${file.name}...`);
         const text = await getKml(file);
-        const format = new ol.format.KML({extractStyles:true, showPointNames:false});
+        // Do not retain KML feature-level styles here. KMZ icon hrefs such as
+        // images/icon-1.png are internal ZIP paths and cannot be requested directly
+        // by the browser after parsing. Feature-level KML styles would also override
+        // this viewer's automatic layer styling.
+        const format = new ol.format.KML({
+          extractStyles: false,
+          showPointNames: false
+        });
         const features = format.readFeatures(text, {
           dataProjection:'EPSG:4326',
           featureProjection: map.getView().getProjection()
         });
         if (!features.length) throw new Error('No geographic features found.');
 
+        // Ensure the vector-layer style controls every imported feature.
+        // This makes KMZ points visible even when their original icon was stored
+        // as a relative image inside the KMZ archive.
+        features.forEach(feature => feature.setStyle(null));
+
+        const defaultLabelField = chooseDefaultLabelField(file.name, features);
+        applyViewerLabel(features, defaultLabelField);
+
+        const geometryCounts = features.reduce((counts, feature) => {
+          const type = feature.getGeometry()?.getType() || 'Unknown';
+          counts[type] = (counts[type] || 0) + 1;
+          return counts;
+        }, {});
+
+        console.info(
+          `Parsed ${features.length.toLocaleString()} features from ${file.name}`,
+          geometryCounts
+        );
+
         const color = colours[uploaded.length % colours.length];
         const source = new ol.source.Vector({features});
 
         const styleAnalysis = analyseLayerStyle(features, file.name);
-        let layerStyle = styleFor(color);
+        const lowerFileName = file.name.toLowerCase();
+        const isSlabLayer = lowerFileName.startsWith('007-') || lowerFileName.startsWith('008-');
+
+        if (isSlabLayer) {
+          const fields = getAllAttributeFields(features);
+          const statusField = findFieldInsensitive(fields, ['StatusA']);
+          if (statusField) {
+            styleAnalysis.mode = 'attribute';
+            styleAnalysis.field = statusField;
+            styleAnalysis.numeric = features
+              .map(feature => feature.get(statusField))
+              .filter(value => value !== null && value !== undefined && value !== '')
+              .every(value => Number.isFinite(Number(value)));
+            styleAnalysis.label = `Styled by ${statusField}`;
+          }
+        }
+
+        const highDensityLayer = features.length > 500;
+        const geometryTypes = new Set(
+          features.map(feature => feature.getGeometry()?.getType()).filter(Boolean)
+        );
+        const containsOnlyLinesOrPolygons =
+          geometryTypes.size > 0 &&
+          [...geometryTypes].every(type =>
+            type === 'LineString' ||
+            type === 'MultiLineString' ||
+            type === 'Polygon' ||
+            type === 'MultiPolygon'
+          );
+
+        // Default labels:
+        // - OFF for 007 and 008
+        // - OFF for line/multiline/polygon-only layers
+        // - OFF for high-density layers
+        // - ON for ordinary point layers
+        const showLabels =
+          !isSlabLayer &&
+          !containsOnlyLinesOrPolygons &&
+          !highDensityLayer;
+
+        if (!showLabels) {
+          features.forEach(feature => feature.set('_viewerLabel', ''));
+        }
+        let layerStyle = styleFor(color, showLabels);
         let categories = [];
         let numericMin = null;
         let numericMax = null;
@@ -1567,16 +1519,39 @@
             categories.sort((a, b) => String(a).localeCompare(String(b), undefined, {numeric:true}));
           }
 
-          layerStyle = attributeLayerStyle(
-            styleAnalysis.field,
-            categories,
-            styleAnalysis.numeric,
-            numericMin,
-            numericMax
-          );
+          if (categories.length > 60 || (highDensityLayer && categories.length > 30)) {
+            styleAnalysis.mode = 'uniform';
+            styleAnalysis.label = highDensityLayer
+              ? `Uniform style (${features.length.toLocaleString()} features; labels on click)`
+              : 'Uniform style';
+            styleAnalysis.field = null;
+            styleAnalysis.numeric = false;
+            categories = [];
+            numericMin = null;
+            numericMax = null;
+            layerStyle = styleFor(color, showLabels);
+          } else {
+            layerStyle = attributeLayerStyle(
+              styleAnalysis.field,
+              categories,
+              styleAnalysis.numeric,
+              numericMin,
+              numericMax
+            );
+          }
         }
 
-        const layer = new ol.layer.Vector({source, style:layerStyle});
+        if (highDensityLayer && styleAnalysis.mode === 'uniform' && !isSlabLayer) {
+          styleAnalysis.label = `Uniform style (${features.length.toLocaleString()} features; labels on click)`;
+        }
+
+        const layer = new ol.layer.Vector({
+          source,
+          style: layerStyle,
+          renderBuffer: 50,
+          updateWhileAnimating: false,
+          updateWhileInteracting: false
+        });
         layer.setProperties({
           fileName:file.name,
           color,
@@ -1586,7 +1561,9 @@
           styleNumeric:styleAnalysis.numeric || false,
           styleCategories:categories,
           numericMin,
-          numericMax
+          numericMax,
+          labelField:defaultLabelField,
+          showLabels
         });
         map.addLayer(layer);
         uploaded.push(layer);
@@ -1643,7 +1620,67 @@
       const styleNumeric = layer.get('styleNumeric');
       const categories = layer.get('styleCategories') || [];
 
-      body.innerHTML = `<div class="style-link">▾ ${esc(styleLabel)}</div>`;
+      const labelField = layer.get('labelField');
+      const labelStateKey = `kmzViewerLabels:${layer.get('fileName')}`;
+      const savedLabelState = localStorage.getItem(labelStateKey);
+      const fileNameForLabels = String(layer.get('fileName') || '');
+      const slabLayerDefaultOff =
+        /^007[-_]/i.test(fileNameForLabels) ||
+        /^008[-_]/i.test(fileNameForLabels);
+
+      const layerGeometryTypes = new Set(
+        layer.getSource().getFeatures()
+          .map(feature => feature.getGeometry()?.getType())
+          .filter(Boolean)
+      );
+
+      const containsOnlyNonPointGeometry =
+        layerGeometryTypes.size > 0 &&
+        [...layerGeometryTypes].every(type =>
+          type === 'LineString' ||
+          type === 'MultiLineString' ||
+          type === 'Polygon' ||
+          type === 'MultiPolygon'
+        );
+
+      const labelsInitiallyVisible = savedLabelState === null
+        ? (!slabLayerDefaultOff &&
+           !containsOnlyNonPointGeometry &&
+           layer.get('showLabels') !== false)
+        : savedLabelState === '1';
+
+      body.innerHTML = `
+        <div class="style-link">▾ ${esc(styleLabel)}</div>
+        <div class="style-link">Labels: ${esc(labelField || 'None')}</div>
+      `;
+
+      const labelToggleRow = document.createElement('label');
+      labelToggleRow.className = 'label-toggle-row';
+      const labelToggle = document.createElement('input');
+      labelToggle.type = 'checkbox';
+      labelToggle.checked = labelsInitiallyVisible;
+      const labelToggleText = document.createElement('span');
+      labelToggleText.textContent = 'Show labels';
+      labelToggleRow.append(labelToggle, labelToggleText);
+      body.appendChild(labelToggleRow);
+
+      function applyLayerLabelVisibility(visible) {
+        const fieldName = layer.get('labelField');
+        layer.getSource().getFeatures().forEach(feature => {
+          const value = visible && fieldName ? feature.get(fieldName) : '';
+          feature.set('_viewerLabel', value === null || value === undefined ? '' : String(value));
+        });
+        layer.set('showLabels', visible);
+        localStorage.setItem(labelStateKey, visible ? '1' : '0');
+        layer.changed();
+      }
+
+      labelToggle.addEventListener('change', event => {
+        event.stopPropagation();
+        applyLayerLabelVisibility(labelToggle.checked);
+      });
+
+      applyLayerLabelVisibility(labelsInitiallyVisible);
 
       function appendLegendRow(labelText, color, matchingFeatures) {
         const row = document.createElement('div');
@@ -1823,6 +1860,138 @@
       map.getTargetElement().style.cursor = map.hasFeatureAtPixel(evt.pixel, {layerFilter:l => uploaded.includes(l)}) ? 'pointer' : '';
     });
 
+
+
+
+    const GOOGLE_DRIVE_FOLDER_URL =
+      'https://drive.google.com/drive/folders/1t2gMvS_uJzQSaT2RWtcVxaWPEinmyxIm?usp=sharing';
+
+    const GOOGLE_DRIVE_KMZ_FILES = [
+      { id: '1sENd8VTWnRN9ZhTdBBabeBQoa2vNi3QV', name: '001-assetsv20250822a.kmz' },
+      { id: '10tc9fSoUKS3CSaEowkivuLCXGkpGojuf', name: '002-Segment 1.kmz' },
+      { id: '1Mii8xE2Fq5KGPDW1vHyPdjav-rNG1q6-', name: '003-supertable_rev0050masterk100.kmz' },
+      { id: '1jt4cQBlXdGCoq-wX0cgr72Ai-hsXauv1', name: '004-pre-bentRail Locations.kmz' },
+      { id: '1-0f_rN6xQO5fVHpv8FMrezDO7n-6Sd2c', name: '005-AssetsSignalling.kmz' },
+      { id: '1CelG2iHJWQFBK-hgruh3OOptXgMbAEVc', name: '006-IntersectionPlan_v20260502a.kmz' },
+      { id: '1FOZEEGgwKqRQU35W4X5HO6Z8krP9LFpb', name: '007-Slabss_v20250922C09b-WB.kmz' },
+      { id: '1CM2lrjIvSDO0ErDGUJTMhLUyywo_Iawv', name: '008-Slabss_v20250922C09b-EB.kmz' }
+    ];
+
+    function publicDriveDownloadUrls(fileId) {
+      const encoded = encodeURIComponent(fileId);
+      return [
+        `https://drive.usercontent.google.com/download?id=${encoded}&export=download&confirm=t`,
+        `https://drive.google.com/uc?export=download&id=${encoded}&confirm=t`
+      ];
+    }
+
+    async function fetchPublicDriveKmz(item) {
+      const urls = publicDriveDownloadUrls(item.id);
+      let lastError = null;
+
+      for (const url of urls) {
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'no-store',
+            redirect: 'follow'
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const contentType = String(
+            response.headers.get('content-type') || ''
+          ).toLowerCase();
+
+          const blob = await response.blob();
+
+          // A KMZ is a ZIP archive and begins with PK.
+          const signature = new Uint8Array(await blob.slice(0, 2).arrayBuffer());
+          const isZip = signature[0] === 0x50 && signature[1] === 0x4b;
+
+          if (!isZip || contentType.includes('text/html')) {
+            throw new Error(
+              'Google Drive returned an HTML confirmation or sign-in page instead of KMZ bytes.'
+            );
+          }
+
+          return blob;
+        } catch (error) {
+          lastError = error;
+          console.warn(`Drive URL failed for ${item.name}:`, url, error);
+        }
+      }
+
+      throw lastError || new Error('Public Google Drive download failed.');
+    }
+
+    async function preloadGoogleDriveKmzFiles() {
+      let loadedCount = 0;
+      const failedFiles = [];
+
+      status(`Loading 0/${GOOGLE_DRIVE_KMZ_FILES.length} KMZ layers from Google Drive...`);
+
+      for (const item of GOOGLE_DRIVE_KMZ_FILES) {
+        try {
+          status(
+            `Loading ${loadedCount + 1}/${GOOGLE_DRIVE_KMZ_FILES.length} from Drive: ${item.name}`
+          );
+
+          const blob = await fetchPublicDriveKmz(item);
+
+          const file = new File([blob], item.name, {
+            type: 'application/vnd.google-earth.kmz',
+            lastModified: Date.now()
+          });
+
+          await loadFile(file);
+          loadedCount += 1;
+        } catch (error) {
+          console.error(`Google Drive load failed for ${item.name}`, error);
+          failedFiles.push(`${item.name}: ${error.message}`);
+        }
+      }
+
+      if (uploaded.length) {
+        fitAll();
+      }
+
+      if (failedFiles.length) {
+        status(
+          `${loadedCount}/${GOOGLE_DRIVE_KMZ_FILES.length} Drive KMZ layers loaded; ` +
+          `${failedFiles.length} failed.`
+        );
+
+        console.warn('Drive KMZ failures:', failedFiles);
+
+        alert(
+          `${loadedCount}/${GOOGLE_DRIVE_KMZ_FILES.length} Google Drive KMZ layers loaded.\n\n` +
+          `Failed:\n${failedFiles.join('\n')}\n\n` +
+          `The files must be shared as “Anyone with the link — Viewer”. ` +
+          `Google Drive may also block browser downloads because of CORS or confirmation pages.`
+        );
+      } else {
+        status(
+          `${loadedCount}/${GOOGLE_DRIVE_KMZ_FILES.length} Google Drive KMZ layers loaded.`
+        );
+      }
+    }
+
+    window.addEventListener('load', () => {
+      window.setTimeout(() => preloadGoogleDriveKmzFiles(), 250);
+    });
+
+    document.getElementById('reloadDriveBtn').onclick = async () => {
+      await preloadGoogleDriveKmzFiles();
+    };
+
+    document.getElementById('openDriveFolderBtn').onclick = () => {
+      window.open(GOOGLE_DRIVE_FOLDER_URL, '_blank', 'noopener');
+    };
+
     document.getElementById('fileInput').addEventListener('change', async e => {
       for (const file of Array.from(e.target.files || [])) await loadFile(file);
       e.target.value = '';
@@ -1848,233 +2017,668 @@
   
     // ---------------- Advanced GIS / My Maps features ----------------
     const drawnSource = new ol.source.Vector();
+    const selectedMarkup = new ol.Collection();
+
+    function hexToRgba(hex, opacity) {
+      const clean = String(hex || '#ff0000').replace('#', '');
+      const full = clean.length === 3
+        ? clean.split('').map(char => char + char).join('')
+        : clean;
+      const number = parseInt(full, 16);
+      return `rgba(${(number >> 16) & 255},${(number >> 8) & 255},${number & 255},${opacity})`;
+    }
+
+    function currentMarkupSettings() {
+      const dashValue = document.getElementById('mkDash')?.value || 'solid';
+      return {
+        stroke: document.getElementById('mkStroke')?.value || '#ff0000',
+        fill: document.getElementById('mkFill')?.value || '#ff0000',
+        width: Number(document.getElementById('mkWidth')?.value || 3),
+        opacity: Number(document.getElementById('mkOpacity')?.value || 35) / 100,
+        dash: dashValue === 'dash' ? [10, 7] : dashValue === 'dot' ? [2, 6] : undefined,
+        fontSize: Number(document.getElementById('mkFontSize')?.value || 16)
+      };
+    }
+
+    function arrowStyles(feature, settings) {
+      const geometry = feature.getGeometry();
+      const styles = [
+        new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color: settings.stroke,
+            width: settings.width,
+            lineDash: settings.dash
+          })
+        })
+      ];
+
+      const coordinates = geometry.getCoordinates();
+      if (coordinates.length < 2) return styles;
+      const end = coordinates[coordinates.length - 1];
+      const previous = coordinates[coordinates.length - 2];
+      const rotation = Math.atan2(end[1] - previous[1], end[0] - previous[0]);
+
+      styles.push(new ol.style.Style({
+        geometry: new ol.geom.Point(end),
+        image: new ol.style.RegularShape({
+          points: 3,
+          radius: 10 + settings.width,
+          fill: new ol.style.Fill({color: settings.stroke}),
+          rotateWithView: true,
+          rotation: -rotation + Math.PI / 2
+        })
+      }));
+      return styles;
+    }
+
+    function markupStyle(feature) {
+      const settings = {
+        stroke: feature.get('_stroke') || '#ff0000',
+        fill: feature.get('_fill') || '#ff0000',
+        width: Number(feature.get('_width') || 3),
+        opacity: Number(feature.get('_opacity') ?? .35),
+        dash: feature.get('_dash') || undefined,
+        fontSize: Number(feature.get('_fontSize') || 16)
+      };
+
+      if (feature.get('_kind') === 'arrow') {
+        return arrowStyles(feature, settings);
+      }
+
+      if (feature.get('_kind') === 'text') {
+        return new ol.style.Style({
+          image: new ol.style.Circle({
+            radius: 2,
+            fill: new ol.style.Fill({color: settings.stroke})
+          }),
+          text: new ol.style.Text({
+            text: String(feature.get('_text') || 'Text'),
+            font: `600 ${settings.fontSize}px Arial`,
+            offsetY: -12,
+            fill: new ol.style.Fill({color: settings.stroke}),
+            stroke: new ol.style.Stroke({color:'#fff', width:3})
+          })
+        });
+      }
+
+      const geometryType = feature.getGeometry()?.getType();
+      return new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: settings.stroke,
+          width: settings.width,
+          lineDash: settings.dash
+        }),
+        fill: new ol.style.Fill({
+          color: hexToRgba(settings.fill, settings.opacity)
+        }),
+        image: new ol.style.Circle({
+          radius: Math.max(5, settings.width + 3),
+          fill: new ol.style.Fill({color: settings.stroke}),
+          stroke: new ol.style.Stroke({color:'#fff', width:1.5})
+        }),
+        text: feature.get('_measurement') ? new ol.style.Text({
+          text: String(feature.get('_measurement')),
+          font: `600 ${settings.fontSize}px Arial`,
+          offsetY: geometryType === 'Point' ? -14 : 0,
+          fill: new ol.style.Fill({color:'#111'}),
+          stroke: new ol.style.Stroke({color:'#fff', width:3})
+        }) : undefined
+      });
+    }
+
     const drawnLayer = new ol.layer.Vector({
       source: drawnSource,
-      style: new ol.style.Style({
-        stroke: new ol.style.Stroke({ color: '#ff5722', width: 3 }),
-        fill: new ol.style.Fill({ color: 'rgba(255,87,34,.2)' }),
-        image: new ol.style.Circle({
-          radius: 7,
-          fill: new ol.style.Fill({ color: '#ff5722' }),
-          stroke: new ol.style.Stroke({ color: '#fff', width: 2 })
-        })
-      })
+      style: markupStyle,
+      zIndex: 999
     });
     map.addLayer(drawnLayer);
 
+    function applyCurrentStyleToFeature(feature, kind = null) {
+      const settings = currentMarkupSettings();
+      feature.setProperties({
+        _kind: kind || feature.get('_kind') || 'shape',
+        _stroke: settings.stroke,
+        _fill: settings.fill,
+        _width: settings.width,
+        _opacity: settings.opacity,
+        _dash: settings.dash,
+        _fontSize: settings.fontSize
+      });
+    }
+
+    let selectInteraction = new ol.interaction.Select({
+      layers: [drawnLayer],
+      features: selectedMarkup,
+      hitTolerance: 8
+    });
+    let modifyInteraction = new ol.interaction.Modify({
+      features: selectedMarkup
+    });
+    let translateInteraction = new ol.interaction.Translate({
+      features: selectedMarkup
+    });
+
+    map.addInteraction(selectInteraction);
+    map.addInteraction(modifyInteraction);
+    map.addInteraction(translateInteraction);
+    modifyInteraction.setActive(false);
+    translateInteraction.setActive(false);
+
+    let undoStack = [];
+    let redoStack = [];
+
+    function snapshotMarkup() {
+      const value = new ol.format.GeoJSON().writeFeatures(drawnSource.getFeatures(), {
+        featureProjection: map.getView().getProjection(),
+        dataProjection: 'EPSG:4326'
+      });
+      if (undoStack[undoStack.length - 1] !== value) {
+        undoStack.push(value);
+        if (undoStack.length > 50) undoStack.shift();
+      }
+      redoStack = [];
+    }
+
+    function restoreMarkup(snapshot) {
+      drawnSource.clear();
+      if (!snapshot) return;
+      const features = new ol.format.GeoJSON().readFeatures(snapshot, {
+        featureProjection: map.getView().getProjection(),
+        dataProjection: 'EPSG:4326'
+      });
+      drawnSource.addFeatures(features);
+    }
+
+    snapshotMarkup();
+
     let drawInteraction = null;
     let measureTooltip = null;
+    let textClickKey = null;
+    let activeMarkupTool = null;
 
-    function stopActiveInteraction() {
+    function setActiveToolButton(activeId = null) {
+      document.querySelectorAll('.tools button, .map-control-panel button')
+        .forEach(button => button.classList.toggle('active', button.id === activeId));
+    }
+
+    function stopActiveInteraction(removeTooltip = true) {
       if (drawInteraction) {
+        try { drawInteraction.abortDrawing(); } catch (error) {}
         map.removeInteraction(drawInteraction);
         drawInteraction = null;
       }
-      if (measureTooltip) {
+      if (textClickKey) {
+        ol.Observable.unByKey(textClickKey);
+        textClickKey = null;
+      }
+      if (removeTooltip && measureTooltip) {
         map.removeOverlay(measureTooltip);
         measureTooltip = null;
       }
+      activeMarkupTool = null;
+      setActiveToolButton(null);
+      document.querySelectorAll('.markup-toolbar button').forEach(button => button.classList.remove('active'));
     }
 
-    function startDraw(type, measure=false) {
+    function activateMarkupButton(buttonId) {
+      document.querySelectorAll('.markup-toolbar button').forEach(button => {
+        button.classList.toggle('active', button.id === buttonId);
+      });
+      activeMarkupTool = buttonId;
+    }
+
+    function startDraw(type, measure = false, activeButtonId = null, options = {}) {
       stopActiveInteraction();
-      drawInteraction = new ol.interaction.Draw({
+      selectInteraction.setActive(false);
+      modifyInteraction.setActive(false);
+      translateInteraction.setActive(false);
+      selectedMarkup.clear();
+      activateMarkupButton(activeButtonId);
+
+      const drawOptions = {
         source: drawnSource,
         type
-      });
+      };
+      if (options.geometryFunction) drawOptions.geometryFunction = options.geometryFunction;
+      if (options.freehand) drawOptions.freehand = true;
+
+      drawInteraction = new ol.interaction.Draw(drawOptions);
       map.addInteraction(drawInteraction);
+
+      let activeFeature = null;
 
       if (measure) {
         const tooltipEl = document.createElement('div');
-        tooltipEl.style.cssText = 'background:rgba(0,0,0,.75);color:#fff;padding:4px 7px;border-radius:3px;font-size:11px;';
+        tooltipEl.className = 'measure-static';
         measureTooltip = new ol.Overlay({
           element: tooltipEl,
-          offset: [0,-10],
-          positioning: 'bottom-center'
+          offset: [0, -10],
+          positioning: 'bottom-center',
+          stopEvent: false
         });
         map.addOverlay(measureTooltip);
 
-        drawInteraction.on('drawstart', evt => {
-          evt.feature.getGeometry().on('change', e => {
-            const geom = e.target;
+        drawInteraction.on('drawstart', event => {
+          activeFeature = event.feature;
+          event.feature.getGeometry().on('change', changeEvent => {
+            const geom = changeEvent.target;
             let output = '';
+
             if (geom instanceof ol.geom.LineString) {
               const length = ol.sphere.getLength(geom);
-              output = length > 1000 ? `${(length/1000).toFixed(2)} km` : `${length.toFixed(1)} m`;
+              output = length >= 1000
+                ? `${(length / 1000).toFixed(2)} km`
+                : `${length.toFixed(1)} m`;
               measureTooltip.setPosition(geom.getLastCoordinate());
             }
+
+            if (geom instanceof ol.geom.Polygon) {
+              const area = ol.sphere.getArea(geom);
+              output = area >= 1000000
+                ? `${(area / 1000000).toFixed(2)} km²`
+                : `${area.toFixed(1)} m²`;
+              measureTooltip.setPosition(geom.getInteriorPoint().getCoordinates());
+            }
+
             tooltipEl.textContent = output;
+            activeFeature.set('_measurement', output);
           });
         });
       }
 
-      drawInteraction.on('drawend', () => {
+      drawInteraction.on('drawend', event => {
+        applyCurrentStyleToFeature(event.feature, options.kind || (measure ? 'measurement' : 'shape'));
+        snapshotMarkup();
+
+        if (measure) {
+          const completedInteraction = drawInteraction;
+          drawInteraction = null;
+          measureTooltip = null;
+          if (completedInteraction) {
+            window.setTimeout(() => map.removeInteraction(completedInteraction), 0);
+          }
+          activeMarkupTool = null;
+          document.querySelectorAll('.markup-toolbar button')
+            .forEach(button => button.classList.remove('active'));
+          status('Measurement completed. Select another tool or press Esc for pan.');
+        } else if (!options.continuous) {
+          stopActiveInteraction();
+        }
+      });
+
+      status(measure
+        ? 'Click on the map. Double-click to finish. Press Esc to cancel.'
+        : 'Drawing active. Press Esc to cancel.');
+    }
+
+    function startTextTool() {
+      stopActiveInteraction();
+      selectInteraction.setActive(false);
+      modifyInteraction.setActive(false);
+      translateInteraction.setActive(false);
+      selectedMarkup.clear();
+      activateMarkupButton('mkText');
+      status('Click the map to place text. Press Esc to cancel.');
+
+      textClickKey = map.once('singleclick', event => {
+        const text = prompt('Annotation text:');
+        if (text && text.trim()) {
+          const feature = new ol.Feature(new ol.geom.Point(event.coordinate));
+          applyCurrentStyleToFeature(feature, 'text');
+          feature.set('_text', text.trim());
+          drawnSource.addFeature(feature);
+          snapshotMarkup();
+        }
         stopActiveInteraction();
       });
     }
 
-    function allFieldNames(layer) {
-      const fields = new Set(['name','Name']);
-      layer.getSource().getFeatures().forEach(f => {
-        Object.keys(f.getProperties()).forEach(k => {
-          if (k !== 'geometry' && typeof f.get(k) !== 'object') fields.add(k);
+    function duplicateSelected() {
+      const selected = selectedMarkup.getArray();
+      if (!selected.length) {
+        status('Select one or more markup objects first.');
+        return;
+      }
+
+      const resolution = map.getView().getResolution() || 1;
+      selected.forEach(feature => {
+        const clone = feature.clone();
+        clone.getGeometry().translate(20 * resolution, -20 * resolution);
+        drawnSource.addFeature(clone);
+      });
+      snapshotMarkup();
+      status(`${selected.length} object(s) duplicated.`);
+    }
+
+    function deleteSelected() {
+      const selected = [...selectedMarkup.getArray()];
+      if (!selected.length) {
+        status('Select one or more markup objects first.');
+        return;
+      }
+      selected.forEach(feature => drawnSource.removeFeature(feature));
+      selectedMarkup.clear();
+      snapshotMarkup();
+      status(`${selected.length} object(s) deleted.`);
+    }
+
+    function setSelectionMode(mode) {
+      stopActiveInteraction();
+      selectedMarkup.clear();
+      selectInteraction.setActive(true);
+      modifyInteraction.setActive(mode === 'modify');
+      translateInteraction.setActive(mode === 'select');
+      activateMarkupButton(mode === 'modify' ? 'mkModify' : 'mkSelect');
+      status(mode === 'modify'
+        ? 'Vertex editing enabled. Select markup and drag vertices.'
+        : 'Selection/move enabled. Select markup and drag it.');
+    }
+
+
+
+    // ---------------------------------------------------------------------
+    // Window visibility manager
+    // ---------------------------------------------------------------------
+    (function setupWindowManager() {
+      const manager = document.getElementById('windowManager');
+      const openButton = document.getElementById('windowManagerBtn');
+      const closeButton = document.getElementById('windowManagerClose');
+
+      const targets = {
+        sidebar: document.getElementById('sidebar'),
+        searchbox: document.querySelector('.searchbox'),
+        topTools: document.querySelector('.tools'),
+        markupToolbar: document.getElementById('markupToolbar'),
+        markupStyle: document.querySelector('.markup-style-panel'),
+        mapControls: document.querySelector('.map-control-panel'),
+        statusLegend: document.getElementById('statusLegend'),
+        basemapSwitch: document.querySelector('.basemap'),
+        coordinates: document.getElementById('coordBox'),
+        statusMessage: document.getElementById('status')
+      };
+
+      function storageKey(name) {
+        return `kmzViewerWindow:${name}`;
+      }
+
+      function setVisible(name, visible, persist = true) {
+        const element = targets[name];
+        if (!element) return;
+
+        if (name === 'sidebar' && window.setLayerPanelVisible) {
+          window.setLayerPanelVisible(visible);
+        } else if (name === 'statusLegend') {
+          element.style.display = visible ? '' : 'none';
+          const legendShow = document.getElementById('legendShowBtn');
+          if (legendShow) legendShow.style.display = visible ? 'none' : '';
+        } else {
+          element.classList.toggle('ui-window-hidden', !visible);
+        }
+
+        const checkbox = manager.querySelector(
+          `input[data-window-target="${name}"]`
+        );
+        if (checkbox) checkbox.checked = visible;
+
+        if (persist) {
+          localStorage.setItem(storageKey(name), visible ? '1' : '0');
+        }
+
+        window.setTimeout(() => {
+          if (window.map && typeof window.map.updateSize === 'function') {
+            window.map.updateSize();
+          }
+        }, 0);
+      }
+
+      manager.querySelectorAll('input[data-window-target]').forEach(input => {
+        const name = input.dataset.windowTarget;
+        const saved = localStorage.getItem(storageKey(name));
+        const initialVisible = saved === null ? true : saved === '1';
+        setVisible(name, initialVisible, false);
+
+        input.addEventListener('change', () => {
+          setVisible(name, input.checked);
         });
       });
-      return [...fields];
+
+      openButton.addEventListener('click', event => {
+        event.stopPropagation();
+        manager.classList.toggle('open');
+      });
+
+      closeButton.addEventListener('click', () => {
+        manager.classList.remove('open');
+      });
+
+      document.addEventListener('click', event => {
+        if (!manager.contains(event.target) && event.target !== openButton) {
+          manager.classList.remove('open');
+        }
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') manager.classList.remove('open');
+      });
+
+      window.setViewerWindowVisible = setVisible;
+    })();
+
+    // ---------------------------------------------------------------------
+    // Layer style dialog functions
+    // ---------------------------------------------------------------------
+    function getStyleLayer() {
+      const index = Number(document.getElementById('styleLayerSelect').value);
+      return Number.isInteger(index) && uploaded[index] ? uploaded[index] : null;
     }
 
     function populateStyleModal() {
       const layerSelect = document.getElementById('styleLayerSelect');
       layerSelect.innerHTML = '';
-      uploaded.forEach((layer, i) => {
-        const o = document.createElement('option');
-        o.value = i;
-        o.textContent = layer.get('fileName');
-        layerSelect.appendChild(o);
+
+      uploaded.forEach((layer, index) => {
+        const option = document.createElement('option');
+        option.value = String(index);
+        option.textContent = layer.get('fileName') || `Layer ${index + 1}`;
+        layerSelect.appendChild(option);
       });
+
       refreshStyleFields();
     }
 
     function refreshStyleFields() {
-      const idx = Number(document.getElementById('styleLayerSelect').value || 0);
-      const layer = uploaded[idx];
+      const layer = getStyleLayer();
       if (!layer) return;
 
-      const fields = allFieldNames(layer);
-      const group = document.getElementById('groupBySelect');
-      const labels = document.getElementById('labelFieldSelect');
-      group.innerHTML = '<option value="">None</option>';
-      labels.innerHTML = '<option value="">No labels</option>';
+      const features = layer.getSource().getFeatures();
+      const fields = getAllAttributeFields(features);
+
+      const groupSelect = document.getElementById('groupBySelect');
+      const labelSelect = document.getElementById('labelFieldSelect');
+
+      groupSelect.innerHTML = '<option value="">None</option>';
+      labelSelect.innerHTML = '<option value="">None</option>';
 
       fields.forEach(field => {
-        const o1 = document.createElement('option');
-        o1.value = field; o1.textContent = field;
-        group.appendChild(o1);
+        const groupOption = document.createElement('option');
+        groupOption.value = field;
+        groupOption.textContent = field;
+        groupSelect.appendChild(groupOption);
 
-        const o2 = document.createElement('option');
-        o2.value = field; o2.textContent = field;
-        labels.appendChild(o2);
+        const labelOption = document.createElement('option');
+        labelOption.value = field;
+        labelOption.textContent = field;
+        labelSelect.appendChild(labelOption);
       });
 
-      group.value = layer.get('styleField') || '';
-      labels.value = layer.get('labelField') || (fields.includes('Name') ? 'Name' : (fields.includes('name') ? 'name' : ''));
-      document.getElementById('groupModeSelect').value = layer.get('styleMode') === 'attribute' ? 'categories' : (layer.get('styleMode') || 'uniform');
-      document.getElementById('labelSizeInput').value = layer.get('labelSize') || 12;
-      document.getElementById('symbolSizeInput').value = layer.get('symbolSize') || 7;
-      document.getElementById('opacityInput').value = Math.round((layer.getOpacity() || 1) * 100);
-      document.getElementById('filterInput').value = layer.get('filterExpression') || '';
+      groupSelect.value = layer.get('styleField') || '';
+      labelSelect.value = layer.get('labelField') || '';
+
+      const styleMode = layer.get('styleMode');
+      document.getElementById('groupModeSelect').value =
+        styleMode === 'attribute'
+          ? (layer.get('styleNumeric') ? 'ranges' : 'categories')
+          : (styleMode === 'individual' ? 'individual' : 'uniform');
+
+      document.getElementById('labelSizeInput').value =
+        String(layer.get('labelSize') || 12);
+      document.getElementById('symbolSizeInput').value =
+        String(layer.get('symbolSize') || 7);
+      document.getElementById('opacityInput').value =
+        String(Math.round((layer.getOpacity() ?? 1) * 100));
+      document.getElementById('filterInput').value =
+        layer.get('filterExpression') || '';
     }
 
-    function parseFilter(expr) {
-      const m = String(expr || '').match(/^\s*([^=<>!]+)\s*=\s*(.+?)\s*$/);
-      if (!m) return null;
-      return { field: m[1].trim(), value: m[2].trim() };
-    }
-
-    function makeDynamicStyle(layer) {
-      const field = layer.get('styleField');
-      const mode = layer.get('styleMode') || 'uniform';
-      const labelField = layer.get('labelField') || 'Name';
-      const labelSize = Number(layer.get('labelSize') || 12);
-      const symbolSize = Number(layer.get('symbolSize') || 7);
-      const filter = parseFilter(layer.get('filterExpression'));
-      const features = layer.getSource().getFeatures();
-
-      let categories = [];
-      let numeric = false;
-      let min = null, max = null;
-
-      if (field) {
-        const vals = features.map(f => f.get(field)).filter(v => v !== null && v !== undefined && v !== '');
-        numeric = vals.length > 0 && vals.every(v => Number.isFinite(Number(v)));
-        categories = [...new Set(vals.map(v => numeric ? Number(v) : String(v)))];
-        categories.sort(numeric ? ((a,b)=>a-b) : ((a,b)=>String(a).localeCompare(String(b), undefined, {numeric:true})));
-        if (numeric && categories.length) { min = Math.min(...categories); max = Math.max(...categories); }
-      }
-
-      const catMap = new Map();
-      categories.forEach((v,i) => catMap.set(String(v), numeric ? numericColor(Number(v), min, max) : categoryPalette(i)));
-
-      return feature => {
-        if (filter && String(feature.get(filter.field)) !== filter.value) return null;
-
-        let color = layer.get('color') || '#4285f4';
-        if (mode === 'attribute' || mode === 'categories' || mode === 'ranges') {
-          const raw = feature.get(field);
-          color = raw === null || raw === undefined || raw === '' ? '#9e9e9e' : (catMap.get(String(numeric ? Number(raw) : raw)) || '#9e9e9e');
-        }
-
-        const label = feature.get(labelField) || '';
-        const type = feature.getGeometry()?.getType();
-        const text = label ? new ol.style.Text({
-          text: String(label),
-          font: `${labelSize}px Arial`,
-          fill: new ol.style.Fill({color:'#222'}),
-          stroke: new ol.style.Stroke({color:'#fff', width:3}),
-          offsetY: (type === 'Point' || type === 'MultiPoint') ? -(symbolSize + 8) : 0,
-          placement: (type === 'LineString' || type === 'MultiLineString') ? 'line' : 'point',
-          overflow: true
-        }) : undefined;
-
-        if (type === 'Point' || type === 'MultiPoint') {
-          return new ol.style.Style({
-            image: new ol.style.Circle({
-              radius: symbolSize,
-              fill: new ol.style.Fill({color}),
-              stroke: new ol.style.Stroke({color:'#fff', width:2})
-            }),
-            text
-          });
-        }
-
-        if (type === 'LineString' || type === 'MultiLineString') {
-          return new ol.style.Style({
-            stroke: new ol.style.Stroke({color, width: Math.max(2, symbolSize/1.5)}),
-            text
-          });
-        }
-
-        return new ol.style.Style({
-          stroke: new ol.style.Stroke({color, width:2}),
-          fill: new ol.style.Fill({color:rgba(color,.3)}),
-          text
-        });
+    function parseSimpleFilter(expression) {
+      const text = String(expression || '').trim();
+      if (!text) return null;
+      const match = text.match(/^([^=!<>]+)\s*(=|!=)\s*(.+)$/);
+      if (!match) return null;
+      return {
+        field: match[1].trim(),
+        operator: match[2],
+        value: match[3].trim()
       };
     }
 
+    function featurePassesFilter(feature, filter) {
+      if (!filter) return true;
+      const actual = feature.get(filter.field);
+      const equal = String(actual ?? '').toLowerCase() ===
+        String(filter.value).toLowerCase();
+      return filter.operator === '!=' ? !equal : equal;
+    }
+
     function applyStyleSettings() {
-      const idx = Number(document.getElementById('styleLayerSelect').value || 0);
-      const layer = uploaded[idx];
-      if (!layer) return;
+      const layer = getStyleLayer();
+      if (!layer) {
+        status('No layer is selected.');
+        return;
+      }
 
+      const features = layer.getSource().getFeatures();
       const groupField = document.getElementById('groupBySelect').value;
-      let mode = document.getElementById('groupModeSelect').value;
-      if (groupField && mode === 'categories') mode = 'attribute';
+      const groupMode = document.getElementById('groupModeSelect').value;
+      const labelField = document.getElementById('labelFieldSelect').value;
+      const labelSize = Number(document.getElementById('labelSizeInput').value) || 12;
+      const symbolSize = Number(document.getElementById('symbolSizeInput').value) || 7;
+      const opacityPercent = Number(document.getElementById('opacityInput').value) || 100;
+      const filterExpression = document.getElementById('filterInput').value.trim();
+      const filter = parseSimpleFilter(filterExpression);
+      const color = layer.get('color') || '#d32f2f';
+      const showLabels = layer.get('showLabels') === true;
 
-      layer.set('styleField', groupField || null);
-      layer.set('styleMode', mode);
-      layer.set('labelField', document.getElementById('labelFieldSelect').value || null);
-      layer.set('labelSize', Number(document.getElementById('labelSizeInput').value));
-      layer.set('symbolSize', Number(document.getElementById('symbolSizeInput').value));
-      layer.set('filterExpression', document.getElementById('filterInput').value.trim());
-      layer.setOpacity(Number(document.getElementById('opacityInput').value)/100);
-      layer.setStyle(makeDynamicStyle(layer));
+      layer.set('labelField', labelField || null);
+      layer.set('labelSize', labelSize);
+      layer.set('symbolSize', symbolSize);
+      layer.set('filterExpression', filterExpression);
+      layer.setOpacity(Math.max(.1, Math.min(1, opacityPercent / 100)));
 
-      localStorage.setItem('kmzViewerStyleSettings', JSON.stringify(
-        uploaded.map(l => ({
-          fileName:l.get('fileName'),
-          styleField:l.get('styleField'),
-          styleMode:l.get('styleMode'),
-          labelField:l.get('labelField'),
-          labelSize:l.get('labelSize'),
-          symbolSize:l.get('symbolSize'),
-          opacity:l.getOpacity(),
-          filterExpression:l.get('filterExpression')
-        }))
-      ));
+      features.forEach(feature => {
+        const value = showLabels && labelField ? feature.get(labelField) : '';
+        feature.set(
+          '_viewerLabel',
+          value === null || value === undefined ? '' : String(value)
+        );
+      });
 
+      let categories = [];
+      let numeric = false;
+      let numericMin = null;
+      let numericMax = null;
+      let baseStyleFunction;
+
+      if ((groupMode === 'categories' || groupMode === 'ranges') && groupField) {
+        const rawValues = features
+          .map(feature => feature.get(groupField))
+          .filter(value => value !== null && value !== undefined && value !== '');
+
+        numeric = groupMode === 'ranges' &&
+          rawValues.length > 0 &&
+          rawValues.every(value => Number.isFinite(Number(value)));
+
+        categories = [...new Set(
+          rawValues.map(value => numeric ? Number(value) : String(value))
+        )];
+
+        if (numeric) {
+          categories.sort((a, b) => a - b);
+          numericMin = Math.min(...categories);
+          numericMax = Math.max(...categories);
+          baseStyleFunction = numericLayerStyle(
+            groupField, numericMin, numericMax
+          );
+        } else {
+          categories.sort((a, b) =>
+            String(a).localeCompare(String(b), undefined, {numeric: true})
+          );
+          baseStyleFunction = attributeLayerStyle(
+            groupField, categories, false, null, null
+          );
+        }
+
+        layer.set('styleMode', 'attribute');
+        layer.set('styleField', groupField);
+        layer.set('styleNumeric', numeric);
+        layer.set(
+          'styleLabel',
+          `${numeric ? 'Ranges' : 'Categories'} by ${groupField}`
+        );
+      } else {
+        baseStyleFunction = styleFor(color, showLabels);
+        layer.set('styleMode', groupMode === 'individual' ? 'individual' : 'uniform');
+        layer.set('styleField', null);
+        layer.set('styleNumeric', false);
+        layer.set(
+          'styleLabel',
+          groupMode === 'individual' ? 'Individual styles' : 'Uniform style'
+        );
+      }
+
+      layer.set('styleCategories', categories);
+      layer.set('numericMin', numericMin);
+      layer.set('numericMax', numericMax);
+
+      layer.setStyle(feature => {
+        if (!featurePassesFilter(feature, filter)) return null;
+        const style = baseStyleFunction(feature);
+        const styles = Array.isArray(style) ? style : [style];
+
+        styles.filter(Boolean).forEach(item => {
+          const text = item.getText && item.getText();
+          if (text) {
+            text.setFont(`${labelSize}px Arial`);
+          }
+          const image = item.getImage && item.getImage();
+          if (image && image.setRadius) {
+            image.setRadius(symbolSize);
+          }
+          const stroke = item.getStroke && item.getStroke();
+          if (stroke && feature.getGeometry() &&
+              /LineString/.test(feature.getGeometry().getType())) {
+            stroke.setWidth(Math.max(1, symbolSize / 2));
+          }
+        });
+        return style;
+      });
+
+      layer.changed();
       document.getElementById('styleModalBackdrop').classList.remove('open');
-      status(`Updated style for ${layer.get('fileName')}.`);
+
+      const folder = [...document.querySelectorAll('.folder')]
+        .find(item => item.dataset.fileName === layer.get('fileName'));
+      if (folder) {
+        const styleLinks = folder.querySelectorAll('.style-link');
+        if (styleLinks[0]) {
+          styleLinks[0].textContent = `▾ ${layer.get('styleLabel')}`;
+        }
+        if (styleLinks[1]) {
+          styleLinks[1].textContent = `Labels: ${labelField || 'None'}`;
+        }
+      }
+
+      status(`Style updated for ${layer.get('fileName')}.`);
     }
 
     document.getElementById('styleBtn').onclick = () => {
@@ -2086,10 +2690,169 @@
     document.getElementById('styleCancelBtn').onclick = () => document.getElementById('styleModalBackdrop').classList.remove('open');
     document.getElementById('styleApplyBtn').onclick = applyStyleSettings;
 
-    document.getElementById('measureBtn').onclick = () => startDraw('LineString', true);
-    document.getElementById('drawPointBtn').onclick = () => startDraw('Point');
-    document.getElementById('drawLineBtn').onclick = () => startDraw('LineString');
-    document.getElementById('drawPolyBtn').onclick = () => startDraw('Polygon');
+    document.getElementById('measureBtn').onclick =
+      () => startDraw('LineString', true, 'measureBtn');
+    document.getElementById('drawPointBtn').onclick =
+      () => startDraw('Point', false, 'drawPointBtn');
+    document.getElementById('drawLineBtn').onclick =
+      () => startDraw('LineString', false, 'drawLineBtn');
+    document.getElementById('drawPolyBtn').onclick =
+      () => startDraw('Polygon', false, 'drawPolyBtn');
+
+    document.getElementById('topMeasureBtn').onclick =
+      () => startDraw('LineString', true, 'topMeasureBtn');
+    document.getElementById('topDrawPointBtn').onclick =
+      () => startDraw('Point', false, 'topDrawPointBtn');
+    document.getElementById('topDrawLineBtn').onclick =
+      () => startDraw('LineString', false, 'topDrawLineBtn');
+
+    document.getElementById('panToolBtn').onclick = () => {
+      stopActiveInteraction();
+      status('Pan mode enabled.');
+    };
+
+    document.getElementById('selectToolBtn').onclick = () => {
+      stopActiveInteraction();
+      status('Select mode enabled. Click a map feature to view its attributes.');
+    };
+
+    document.getElementById('zoomAllToolBtn').onclick = () => fitAll();
+
+    document.getElementById('undoDrawBtn').onclick = () => {
+      const features = drawnSource.getFeatures();
+      if (!features.length) {
+        status('There are no drawings to undo.');
+        return;
+      }
+      drawnSource.removeFeature(features[features.length - 1]);
+      status('Last drawing removed.');
+    };
+
+    document.getElementById('clearDrawBtn').onclick = () => {
+      stopActiveInteraction();
+      drawnSource.clear();
+      status('All drawings cleared.');
+    };
+
+
+    // Paint.NET-style markup toolbar
+    document.getElementById('mkSelect').onclick = () => setSelectionMode('select');
+    document.getElementById('mkModify').onclick = () => setSelectionMode('modify');
+    document.getElementById('mkPoint').onclick =
+      () => startDraw('Point', false, 'mkPoint', {kind:'point'});
+    document.getElementById('mkLine').onclick =
+      () => startDraw('LineString', false, 'mkLine', {kind:'line'});
+    document.getElementById('mkPolygon').onclick =
+      () => startDraw('Polygon', false, 'mkPolygon', {kind:'polygon'});
+    document.getElementById('mkRectangle').onclick =
+      () => startDraw('Circle', false, 'mkRectangle', {
+        kind:'rectangle',
+        geometryFunction: ol.interaction.Draw.createBox()
+      });
+    document.getElementById('mkCircle').onclick =
+      () => startDraw('Circle', false, 'mkCircle', {kind:'circle'});
+    document.getElementById('mkFreehand').onclick =
+      () => startDraw('LineString', false, 'mkFreehand', {kind:'freehand', freehand:true});
+    document.getElementById('mkArrow').onclick =
+      () => startDraw('LineString', false, 'mkArrow', {kind:'arrow'});
+    document.getElementById('mkText').onclick = startTextTool;
+    document.getElementById('mkCloud').onclick = () => {
+      document.getElementById('mkDash').value = 'dot';
+      startDraw('LineString', false, 'mkCloud', {kind:'revision-cloud', freehand:true});
+    };
+    document.getElementById('mkMeasureDistance').onclick =
+      () => startDraw('LineString', true, 'mkMeasureDistance', {kind:'distance'});
+    document.getElementById('mkMeasureArea').onclick =
+      () => startDraw('Polygon', true, 'mkMeasureArea', {kind:'area'});
+    document.getElementById('mkDuplicate').onclick = duplicateSelected;
+    document.getElementById('mkDelete').onclick = deleteSelected;
+
+    document.getElementById('mkUndo').onclick = () => {
+      if (undoStack.length <= 1) {
+        status('Nothing to undo.');
+        return;
+      }
+      const current = undoStack.pop();
+      redoStack.push(current);
+      restoreMarkup(undoStack[undoStack.length - 1]);
+      status('Undo completed.');
+    };
+
+    document.getElementById('mkRedo').onclick = () => {
+      if (!redoStack.length) {
+        status('Nothing to redo.');
+        return;
+      }
+      const snapshot = redoStack.pop();
+      undoStack.push(snapshot);
+      restoreMarkup(snapshot);
+      status('Redo completed.');
+    };
+
+    document.getElementById('mkSave').onclick = () => {
+      const snapshot = new ol.format.GeoJSON().writeFeatures(drawnSource.getFeatures(), {
+        featureProjection: map.getView().getProjection(),
+        dataProjection: 'EPSG:4326'
+      });
+      localStorage.setItem('kmzViewerMarkup', snapshot);
+      status(`${drawnSource.getFeatures().length} markup object(s) saved locally.`);
+    };
+
+    document.getElementById('mkLoad').onclick = () => {
+      const snapshot = localStorage.getItem('kmzViewerMarkup');
+      if (!snapshot) {
+        status('No locally saved markup was found.');
+        return;
+      }
+      restoreMarkup(snapshot);
+      snapshotMarkup();
+      status(`${drawnSource.getFeatures().length} markup object(s) restored.`);
+    };
+
+    document.getElementById('mkExport').onclick = () => {
+      const geojson = new ol.format.GeoJSON().writeFeatures(drawnSource.getFeatures(), {
+        featureProjection: map.getView().getProjection(),
+        dataProjection: 'EPSG:4326'
+      });
+      const url = URL.createObjectURL(new Blob([geojson], {type:'application/geo+json'}));
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'map_markup.geojson';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    };
+
+    document.getElementById('mkClear').onclick = () => {
+      if (!drawnSource.getFeatures().length) return;
+      if (!confirm('Clear all markup and measurements?')) return;
+      drawnSource.clear();
+      selectedMarkup.clear();
+      snapshotMarkup();
+      status('All markup cleared.');
+    };
+
+    ['mkStroke','mkFill','mkWidth','mkOpacity','mkDash','mkFontSize'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        selectedMarkup.getArray().forEach(feature => applyCurrentStyleToFeature(feature));
+        drawnLayer.changed();
+      });
+    });
+
+    selectInteraction.on('select', () => {
+      const feature = selectedMarkup.item(0);
+      if (!feature) return;
+      const stroke = feature.get('_stroke');
+      const fill = feature.get('_fill');
+      if (stroke) document.getElementById('mkStroke').value = stroke;
+      if (fill) document.getElementById('mkFill').value = fill;
+      document.getElementById('mkWidth').value = feature.get('_width') || 3;
+      document.getElementById('mkOpacity').value = Math.round((feature.get('_opacity') ?? .35) * 100);
+      document.getElementById('mkFontSize').value = feature.get('_fontSize') || 16;
+    });
+
+    modifyInteraction.on('modifyend', snapshotMarkup);
+    translateInteraction.on('translateend', snapshotMarkup);
+
 
     document.getElementById('exportBtn').onclick = () => {
       const features = [];
@@ -2263,107 +3026,204 @@
 
 </script>
 
-  <div class="map-control-panel">
-    <button id="styleBtn" title="Layer style">🎨</button>
-    <button id="measureBtn" title="Measure distance">📏</button>
-    <button id="drawPointBtn" title="Draw point">📍</button>
-    <button id="drawLineBtn" title="Draw line">／</button>
-    <button id="drawPolyBtn" title="Draw polygon">⬡</button>
-    <button id="exportBtn" title="Export visible data">⇩</button>
-    <button id="baseGalleryBtn" title="Basemaps">🗺</button>
-  </div>
+    <script>
+    (function () {
+      const sidebar = document.getElementById('sidebar');
+      const openButton = document.getElementById('mobileLayersBtn');
+      const closeButton = document.getElementById('mobileSidebarClose');
+      const desktopToggle = document.getElementById('desktopSidebarToggle');
+      const mobileQuery = window.matchMedia('(max-width: 760px)');
+      const storageKey = 'kmzViewerLayerPanelVisible';
 
-  <div id="coordBox" class="coord-box">Lat: — &nbsp; Lon: —</div>
+      function setPanelVisible(visible, persist = true) {
+        if (mobileQuery.matches) {
+          sidebar.classList.toggle('mobile-open', visible);
+          sidebar.classList.remove('panel-hidden');
+        } else {
+          sidebar.classList.remove('mobile-open');
+          sidebar.classList.toggle('panel-hidden', !visible);
+        }
 
-  <div id="baseGallery" class="basemap-gallery">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <strong style="font-size:13px;">Base map</strong>
-      <button id="closeBaseGallery" style="border:0;background:transparent;cursor:pointer;">×</button>
-    </div>
-    <div class="basemap-grid" id="basemapGrid"></div>
-  </div>
+        document.body.classList.toggle('layers-panel-hidden', !visible);
+        openButton.classList.toggle('force-visible', !visible);
+        openButton.setAttribute('aria-expanded', visible ? 'true' : 'false');
 
-  <div id="styleModalBackdrop" class="modal-backdrop">
-    <div class="modal">
-      <h2>Layer style</h2>
-      <div class="modal-grid">
-        <div class="field-row">
-          <label>Layer</label>
-          <select id="styleLayerSelect"></select>
-        </div>
-        <div class="field-row">
-          <label>Group places by</label>
-          <select id="groupBySelect"></select>
-        </div>
-        <div class="field-row">
-          <label>Grouping mode</label>
-          <select id="groupModeSelect">
-            <option value="categories">Categories</option>
-            <option value="ranges">Ranges</option>
-            <option value="uniform">Uniform</option>
-            <option value="individual">Individual styles</option>
-          </select>
-        </div>
-        <div class="field-row">
-          <label>Set labels</label>
-          <select id="labelFieldSelect"></select>
-        </div>
-        <div class="field-row">
-          <label>Label size</label>
-          <input id="labelSizeInput" type="range" min="9" max="22" value="12" />
-        </div>
-        <div class="field-row">
-          <label>Line / marker size</label>
-          <input id="symbolSizeInput" type="range" min="3" max="14" value="7" />
-        </div>
-        <div class="field-row">
-          <label>Opacity</label>
-          <input id="opacityInput" type="range" min="10" max="100" value="100" />
-        </div>
-        <div class="field-row">
-          <label>Filter expression</label>
-          <input id="filterInput" placeholder="Example: StatusA=7 or Type=WSD" />
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button id="styleCancelBtn">Cancel</button>
-        <button id="styleApplyBtn" class="primary">Apply</button>
-      </div>
-    </div>
-  </div>
+        if (desktopToggle) {
+          desktopToggle.textContent = visible ? '◀' : '▶';
+          desktopToggle.title = visible ? 'Hide layer window' : 'Show layer window';
+          desktopToggle.setAttribute(
+            'aria-label',
+            visible ? 'Hide layer window' : 'Show layer window'
+          );
+        }
+
+        if (persist) {
+          localStorage.setItem(storageKey, visible ? '1' : '0');
+        }
+
+        window.setTimeout(function () {
+          if (window.map && typeof window.map.updateSize === 'function') {
+            window.map.updateSize();
+          }
+        }, 0);
+      }
+
+      function panelVisible() {
+        return mobileQuery.matches
+          ? sidebar.classList.contains('mobile-open')
+          : !sidebar.classList.contains('panel-hidden');
+      }
+
+      function applySavedState() {
+        const saved = localStorage.getItem(storageKey);
+        const visible = saved === null ? !mobileQuery.matches : saved === '1';
+        setPanelVisible(visible, false);
+
+        if (mobileQuery.matches) {
+          const statusLegend = document.getElementById('statusLegend');
+          if (statusLegend && !statusLegend.classList.contains('collapsed')) {
+            statusLegend.classList.add('collapsed');
+          }
+        }
+      }
+
+      openButton.addEventListener('click', function () {
+        setPanelVisible(true);
+      });
+
+      closeButton.addEventListener('click', function () {
+        setPanelVisible(false);
+      });
+
+      desktopToggle.addEventListener('click', function (event) {
+        event.stopPropagation();
+        setPanelVisible(!panelVisible());
+      });
+
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && mobileQuery.matches && panelVisible()) {
+          setPanelVisible(false);
+        }
+      });
+
+      sidebar.addEventListener('click', function (event) {
+        if (mobileQuery.matches && event.target.matches('#fitAllBtn')) {
+          window.setTimeout(function () {
+            setPanelVisible(false);
+          }, 150);
+        }
+      });
+
+      mobileQuery.addEventListener('change', applySavedState);
+      applySavedState();
+
+      window.setLayerPanelVisible = setPanelVisible;
+    })();
+  </script>
 
 
-  <button id="legendShowBtn" class="legend-toggle-floating" title="Show legend">☷</button>
 
-  <section id="statusLegend" class="status-legend" aria-label="Construction status legend">
-    <div class="legend-header">
-      <span>Construction Status</span>
-      <button id="legendCollapseBtn" title="Collapse legend">−</button>
-      <button id="legendHideBtn" title="Hide legend">×</button>
-    </div>
-    <div class="legend-body">
-      <div class="legend-item">
-        <span class="legend-swatch legend-grey"></span>
-        <span>Grey - N/A</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-swatch legend-yellow"></span>
-        <span>Yellow - Formwork Completed</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-swatch legend-orange"></span>
-        <span>Orange - Rebar Installed</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-swatch legend-green"></span>
-        <span>Green - Concrete In Situ</span>
-      </div>
-      <div class="legend-item">
-        <span class="legend-swatch legend-blue"></span>
-        <span>Blue - Rail Installed</span>
-      </div>
-    </div>
-  </section>
+  <script>
+    window.addEventListener('error', event => {
+      console.error('Viewer error:', event.error || event.message);
+      const statusElement = document.getElementById('status');
+      if (statusElement) {
+        statusElement.textContent = `Viewer error: ${event.message}`;
+      }
+    });
+
+    document.addEventListener('keydown', event => {
+      const target = event.target;
+      const editingText = target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable
+      );
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+
+        if (typeof stopActiveInteraction === 'function') {
+          stopActiveInteraction();
+        }
+
+        if (typeof modifyInteraction !== 'undefined') {
+          modifyInteraction.setActive(false);
+        }
+        if (typeof translateInteraction !== 'undefined') {
+          translateInteraction.setActive(false);
+        }
+        if (typeof selectInteraction !== 'undefined') {
+          selectInteraction.setActive(false);
+        }
+        if (typeof selectedMarkup !== 'undefined') {
+          selectedMarkup.clear();
+        }
+
+        document.getElementById('styleModalBackdrop')?.classList.remove('open');
+        document.getElementById('baseGallery')?.classList.remove('open');
+
+        if (typeof overlay !== 'undefined') {
+          overlay.setPosition(undefined);
+        }
+
+        const popup = document.getElementById('popup');
+        if (popup) popup.style.display = 'none';
+
+        if (typeof status === 'function') {
+          status('Pan mode. Active tool cancelled.');
+        }
+        return;
+      }
+
+      if (editingText) return;
+
+      if (event.key === 'Delete') {
+        event.preventDefault();
+        if (typeof deleteSelected === 'function') deleteSelected();
+        return;
+      }
+
+      if (event.ctrlKey && event.key.toLowerCase() === 'd') {
+        event.preventDefault();
+        if (typeof duplicateSelected === 'function') duplicateSelected();
+        return;
+      }
+
+      if (event.ctrlKey && event.key.toLowerCase() === 'z') {
+        event.preventDefault();
+        document.getElementById('mkUndo')?.click();
+        return;
+      }
+
+      if (event.ctrlKey && event.key.toLowerCase() === 'y') {
+        event.preventDefault();
+        document.getElementById('mkRedo')?.click();
+        return;
+      }
+
+      const shortcuts = {
+        s: 'mkSelect',
+        v: 'mkModify',
+        p: 'mkPoint',
+        l: 'mkLine',
+        g: 'mkPolygon',
+        r: 'mkRectangle',
+        c: 'mkCircle',
+        f: 'mkFreehand',
+        a: 'mkArrow',
+        t: 'mkText',
+        m: 'mkMeasureDistance'
+      };
+
+      const toolId = shortcuts[event.key.toLowerCase()];
+      if (toolId && !event.ctrlKey && !event.altKey && !event.metaKey) {
+        event.preventDefault();
+        document.getElementById(toolId)?.click();
+      }
+    });
+  </script>
 
 </body>
 </html>
