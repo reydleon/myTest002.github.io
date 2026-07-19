@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5" />
-  <title>Local KMZ Map Viewer 020.6 Public Drive No Key</title>
+  <title>Local KMZ Map Viewer 021.3 Updated Drive Endpoint</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.6.1/ol.css" />
   <style>
     :root {
@@ -855,8 +855,10 @@
 
     <div class="actionbar">
       <button id="addLayerBtn">◆ Add layer</button>
-      <button id="openDriveFolderBtn" type="button">☁ Open Drive</button>
-      <button id="reloadDriveBtn" type="button">↻ Reload Drive</button>
+      <button id="openDriveFolderBtn" type="button">☁ Open Parent</button>
+      <button id="driveEndpointBtn" type="button">⚙ Change Endpoint</button>
+      <button id="reloadDefaultBtn" type="button">↻ Reload 20260718A</button>
+      <button id="reloadDriveBtn" type="button">⇧ Load Latest</button>
       <button>↗ Share</button>
       <button class="preview">◉ Preview</button>
     </div>
@@ -1863,95 +1865,151 @@
 
 
 
-    const GOOGLE_DRIVE_FOLDER_URL =
+
+    const DRIVE_PARENT_FOLDER_URL =
       'https://drive.google.com/drive/folders/1t2gMvS_uJzQSaT2RWtcVxaWPEinmyxIm?usp=sharing';
 
-    const GOOGLE_DRIVE_KMZ_FILES = [
-      { id: '1sENd8VTWnRN9ZhTdBBabeBQoa2vNi3QV', name: '001-assetsv20250822a.kmz' },
-      { id: '10tc9fSoUKS3CSaEowkivuLCXGkpGojuf', name: '002-Segment 1.kmz' },
-      { id: '1Mii8xE2Fq5KGPDW1vHyPdjav-rNG1q6-', name: '003-supertable_rev0050masterk100.kmz' },
-      { id: '1jt4cQBlXdGCoq-wX0cgr72Ai-hsXauv1', name: '004-pre-bentRail Locations.kmz' },
-      { id: '1-0f_rN6xQO5fVHpv8FMrezDO7n-6Sd2c', name: '005-AssetsSignalling.kmz' },
-      { id: '1CelG2iHJWQFBK-hgruh3OOptXgMbAEVc', name: '006-IntersectionPlan_v20260502a.kmz' },
-      { id: '1FOZEEGgwKqRQU35W4X5HO6Z8krP9LFpb', name: '007-Slabss_v20250922C09b-WB.kmz' },
-      { id: '1CM2lrjIvSDO0ErDGUJTMhLUyywo_Iawv', name: '008-Slabss_v20250922C09b-EB.kmz' }
-    ];
+    const DRIVE_ENDPOINT_STORAGE_KEY = 'kmzViewerDriveBridgeEndpoint';
+    const DEFAULT_DRIVE_BRIDGE_ENDPOINT =
+      'https://script.google.com/macros/s/AKfycbzwAMTdGpoa6lehJkw26H2csg0xJj26iJjr9eYqwOZe53JqphDXpmIIK2go8h32uBWw/exec';
 
-    function publicDriveDownloadUrls(fileId) {
-      const encoded = encodeURIComponent(fileId);
-      return [
-        `https://drive.usercontent.google.com/download?id=${encoded}&export=download&confirm=t`,
-        `https://drive.google.com/uc?export=download&id=${encoded}&confirm=t`
-      ];
+    function getDriveBridgeEndpoint() {
+      return localStorage.getItem(DRIVE_ENDPOINT_STORAGE_KEY) ||
+        DEFAULT_DRIVE_BRIDGE_ENDPOINT;
     }
 
-    async function fetchPublicDriveKmz(item) {
-      const urls = publicDriveDownloadUrls(item.id);
-      let lastError = null;
+    function normalizeDriveBridgeEndpoint(value) {
+      return String(value || '').trim().replace(/\/+$/, '');
+    }
 
-      for (const url of urls) {
-        try {
-          const response = await fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            cache: 'no-store',
-            redirect: 'follow'
-          });
+    function configureDriveBridgeEndpoint() {
+      const current = getDriveBridgeEndpoint();
+      const entered = window.prompt(
+        'Paste the deployed Google Apps Script Web App /exec URL.\n\n' +
+        'This endpoint reads the newest YYYYMMDD folder from the parent Drive folder.',
+        current
+      );
 
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
+      if (entered === null) return current;
 
-          const contentType = String(
-            response.headers.get('content-type') || ''
-          ).toLowerCase();
+      const endpoint = normalizeDriveBridgeEndpoint(entered);
 
-          const blob = await response.blob();
-
-          // A KMZ is a ZIP archive and begins with PK.
-          const signature = new Uint8Array(await blob.slice(0, 2).arrayBuffer());
-          const isZip = signature[0] === 0x50 && signature[1] === 0x4b;
-
-          if (!isZip || contentType.includes('text/html')) {
-            throw new Error(
-              'Google Drive returned an HTML confirmation or sign-in page instead of KMZ bytes.'
-            );
-          }
-
-          return blob;
-        } catch (error) {
-          lastError = error;
-          console.warn(`Drive URL failed for ${item.name}:`, url, error);
-        }
+      if (endpoint) {
+        localStorage.setItem(DRIVE_ENDPOINT_STORAGE_KEY, endpoint);
+        status('Google Drive bridge endpoint saved.');
+      } else {
+        localStorage.removeItem(DRIVE_ENDPOINT_STORAGE_KEY);
+        status('Google Drive bridge endpoint removed.');
       }
 
-      throw lastError || new Error('Public Google Drive download failed.');
+      return endpoint;
     }
 
-    async function preloadGoogleDriveKmzFiles() {
+    async function fetchDriveBridgeJson(endpoint, params) {
+      const url = new URL(endpoint);
+      Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.set(key, value);
+      });
+
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-store',
+        redirect: 'follow'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Drive bridge HTTP ${response.status}`);
+      }
+
+      const payload = await response.json();
+
+      if (!payload || payload.ok !== true) {
+        throw new Error(payload?.error || 'Drive bridge returned an invalid response.');
+      }
+
+      return payload;
+    }
+
+    function base64ToBlob(base64, mimeType) {
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+
+      for (let index = 0; index < binary.length; index += 1) {
+        bytes[index] = binary.charCodeAt(index);
+      }
+
+      return new Blob([bytes], {
+        type: mimeType || 'application/vnd.google-earth.kmz'
+      });
+    }
+
+    async function loadDriveRevision(mode = 'default', forceEndpointPrompt = false) {
+      let endpoint = getDriveBridgeEndpoint();
+
+      if (!endpoint || forceEndpointPrompt) {
+        endpoint = configureDriveBridgeEndpoint();
+      }
+
+      if (!endpoint) {
+        status(
+          'Drive loading paused. Click “Drive Endpoint” and paste the Apps Script /exec URL.'
+        );
+        return;
+      }
+
+      status(
+        mode === 'latest'
+          ? 'Checking the parent Drive folder for the newest dated revision...'
+          : 'Loading default Drive revision 20260718A...'
+      );
+
+      const manifest = await fetchDriveBridgeJson(endpoint, {
+        action: 'manifest',
+        mode: mode,
+        cacheBust: String(Date.now())
+      });
+
+      const files = Array.isArray(manifest.files) ? manifest.files : [];
+
+      if (!files.length) {
+        status(`No KMZ files found in ${manifest.selectedFolder}.`);
+        return;
+      }
+
+      status(
+        `Selected Drive revision ${manifest.selectedFolder}; loading ${files.length} KMZ files...`
+      );
+
       let loadedCount = 0;
-      const failedFiles = [];
+      const failures = [];
 
-      status(`Loading 0/${GOOGLE_DRIVE_KMZ_FILES.length} KMZ layers from Google Drive...`);
-
-      for (const item of GOOGLE_DRIVE_KMZ_FILES) {
+      for (const item of files) {
         try {
           status(
-            `Loading ${loadedCount + 1}/${GOOGLE_DRIVE_KMZ_FILES.length} from Drive: ${item.name}`
+            `Revision ${manifest.selectedFolder}: ` +
+            `${loadedCount + 1}/${files.length} — ${item.name}`
           );
 
-          const blob = await fetchPublicDriveKmz(item);
+          const filePayload = await fetchDriveBridgeJson(endpoint, {
+            action: 'file',
+            id: item.id,
+            cacheBust: String(Date.now())
+          });
 
+          const blob = base64ToBlob(filePayload.base64, filePayload.mimeType);
           const file = new File([blob], item.name, {
-            type: 'application/vnd.google-earth.kmz',
-            lastModified: Date.now()
+            type: filePayload.mimeType || 'application/vnd.google-earth.kmz',
+            lastModified: item.modifiedTime
+              ? Date.parse(item.modifiedTime)
+              : Date.now()
           });
 
           await loadFile(file);
           loadedCount += 1;
         } catch (error) {
-          console.error(`Google Drive load failed for ${item.name}`, error);
-          failedFiles.push(`${item.name}: ${error.message}`);
+          console.error(`Failed to load ${item.name}`, error);
+          failures.push(`${item.name}: ${error.message}`);
         }
       }
 
@@ -1959,37 +2017,67 @@
         fitAll();
       }
 
-      if (failedFiles.length) {
+      if (failures.length) {
         status(
-          `${loadedCount}/${GOOGLE_DRIVE_KMZ_FILES.length} Drive KMZ layers loaded; ` +
-          `${failedFiles.length} failed.`
+          `Revision ${manifest.selectedFolder}: ${loadedCount}/${files.length} loaded; ` +
+          `${failures.length} failed.`
         );
-
-        console.warn('Drive KMZ failures:', failedFiles);
-
         alert(
-          `${loadedCount}/${GOOGLE_DRIVE_KMZ_FILES.length} Google Drive KMZ layers loaded.\n\n` +
-          `Failed:\n${failedFiles.join('\n')}\n\n` +
-          `The files must be shared as “Anyone with the link — Viewer”. ` +
-          `Google Drive may also block browser downloads because of CORS or confirmation pages.`
+          `Selected revision: ${manifest.selectedFolder}\n\n` +
+          `${loadedCount}/${files.length} KMZ files loaded.\n\n` +
+          `Failures:\n${failures.join('\n')}`
         );
       } else {
         status(
-          `${loadedCount}/${GOOGLE_DRIVE_KMZ_FILES.length} Google Drive KMZ layers loaded.`
+          `Revision ${manifest.selectedFolder}: all ${loadedCount} KMZ files loaded.`
         );
+      }
+
+      const revisionElement = document.getElementById('activeDriveRevision');
+      if (revisionElement) {
+        revisionElement.textContent = `Drive revision: ${manifest.selectedFolder}`;
       }
     }
 
     window.addEventListener('load', () => {
-      window.setTimeout(() => preloadGoogleDriveKmzFiles(), 250);
+      window.setTimeout(() => loadDriveRevision('default', false), 300);
     });
 
+    document.getElementById('driveEndpointBtn').onclick = () => {
+      const endpoint = configureDriveBridgeEndpoint();
+      if (endpoint) {
+        status('Drive endpoint saved. Click “Reload 20260718A” or “Load Latest”.');
+      }
+    };
+
+    document.getElementById('reloadDefaultBtn').onclick = async () => {
+      try {
+        await loadDriveRevision('default', false);
+      } catch (error) {
+        console.error(error);
+        status(`Drive loading failed: ${error.message}`);
+        alert(
+          `Drive loading failed:\n\n${error.message}\n\n` +
+          `Confirm that the Apps Script deployment is public and that you pasted its /exec URL.`
+        );
+      }
+    };
+
     document.getElementById('reloadDriveBtn').onclick = async () => {
-      await preloadGoogleDriveKmzFiles();
+      try {
+        await loadDriveRevision('latest', false);
+      } catch (error) {
+        console.error(error);
+        status(`Drive loading failed: ${error.message}`);
+        alert(
+          `Drive loading failed:\n\n${error.message}\n\n` +
+          `Confirm that the Apps Script deployment is public and that you pasted its /exec URL.`
+        );
+      }
     };
 
     document.getElementById('openDriveFolderBtn').onclick = () => {
-      window.open(GOOGLE_DRIVE_FOLDER_URL, '_blank', 'noopener');
+      window.open(DRIVE_PARENT_FOLDER_URL, '_blank', 'noopener');
     };
 
     document.getElementById('fileInput').addEventListener('change', async e => {

@@ -1,4 +1,4 @@
-# Local KMZ Map Viewer 020.6 — Public Google Drive Loading Without API Key
+# Local KMZ Map Viewer 021.3 — Updated Drive Endpoint
 
 Static GitHub Pages build for:
 
@@ -425,4 +425,99 @@ Google Drive is not designed as a public static-file CDN. Even public files can
 sometimes be blocked by cross-origin restrictions, virus-scan confirmation,
 download throttling, or sign-in pages. When this happens, the viewer reports the
 affected filenames instead of trying to parse HTML as KMZ.
-"# myTest002.github.io" 
+
+
+## Revision 21 — latest dated Drive folder
+
+The viewer now uses the parent folder:
+
+```text
+https://drive.google.com/drive/folders/1t2gMvS_uJzQSaT2RWtcVxaWPEinmyxIm
+```
+
+It automatically selects the newest direct subfolder whose name matches:
+
+```text
+YYYYMMDD
+YYYYMMDDA
+YYYYMMDDB
+```
+
+Examples:
+
+```text
+20260718
+20260718A
+20260718B
+20260719
+```
+
+The selected revision is `20260719`.
+
+### Google Apps Script bridge
+
+GitHub Pages cannot directly enumerate Google Drive folders or reliably download
+Drive files because of browser CORS restrictions. Revision 21 includes:
+
+```text
+google-apps-script/
+├── Code.gs
+├── appsscript.json
+└── SETUP.md
+```
+
+Deploy the included Apps Script as a public Web App, then paste its `/exec` URL
+using **Drive Endpoint**.
+
+The bridge:
+
+- Enumerates the parent folder.
+- Selects the newest dated revision folder.
+- Returns the KMZ manifest.
+- Returns KMZ bytes as base64 JSON.
+- Requires no API key in the website.
+- Keeps Drive authorization inside the Apps Script owner account.
+
+
+## Revision 21.1 default folder
+
+The fixed startup revision is:
+
+```text
+20260718A
+https://drive.google.com/drive/folders/1oSQ2Ji08nMgY2p7fNiVO4upyY5j-I_bg
+```
+
+Startup no longer selects the newest dated folder automatically.
+
+- **Reload 20260718A** loads the fixed default revision.
+- **Load Latest** manually scans the parent folder and loads the newest `YYYYMMDD*` revision.
+- If newer dated folders are added, they do not replace the default unless **Load Latest** is selected.
+
+
+## Revision 21.2 endpoint
+
+The Google Apps Script bridge is built into the viewer:
+
+```text
+https://script.google.com/macros/s/AKfycbzwAMTdGpoa6lehJkw26H2csg0xJj26iJjr9eYqwOZe53JqphDXpmIIK2go8h32uBWw/exec
+```
+
+Behavior:
+
+- No endpoint prompt on first load.
+- Startup loads `20260718A`.
+- **Reload 20260718A** reloads the fixed default folder.
+- **Load Latest** selects the newest `YYYYMMDD*` folder.
+- **Change Endpoint** remains available for future redeployments.
+
+
+## Revision 21.3 endpoint update
+
+The built-in Apps Script endpoint is now:
+
+```text
+https://script.google.com/macros/s/AKfycbzwAMTdGpoa6lehJkw26H2csg0xJj26iJjr9eYqwOZe53JqphDXpmIIK2go8h32uBWw/exec
+```
+
+Startup continues to load `20260718A` automatically.
