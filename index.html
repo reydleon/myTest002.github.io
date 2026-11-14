@@ -2868,80 +2868,18 @@
     }
 
     async function loadDriveRevision(mode = 'folder', forceEndpointPrompt = false) {
-      let endpoint = getDriveBridgeEndpoint();
-
-      if (!endpoint || forceEndpointPrompt) {
-        endpoint = configureDriveBridgeEndpoint();
-      }
-
-      if (!endpoint) {
-        status(
-          'Drive loading paused. Click “Drive Endpoint” and paste the Apps Script /exec URL.'
-        );
-        return;
-      }
-
-      status(
-        mode === 'latest'
-          ? 'Checking Google Drive for the latest available files...'
-          : 'Loading KMZ files from the configured _001-KML folder...'
-      );
-
-      const selectedFolderId = getSelectedDriveFolderId();
-      // Verified Google Drive file IDs for the 1001 _001-KML folder.
-      // Use these when the deployed Apps Script still points to dated revision 20260718A.
-      const VERIFIED_KMZ_FOLDER_FILES = [
-        {
-                "id": "1sENd8VTWnRN9ZhTdBBabeBQoa2vNi3QV",
-                "name": "001-assetsv20250822a.kmz",
-                "modifiedTime": "2026-07-19T07:45:02.000Z"
-        },
-        {
-                "id": "1Mii8xE2Fq5KGPDW1vHyPdjav-rNG1q6-",
-                "name": "003-supertable_rev0050masterk100.kmz",
-                "modifiedTime": "2026-07-19T07:48:12.000Z"
-        },
-        {
-                "id": "1FOZEEGgwKqRQU35W4X5HO6Z8krP9LFpb",
-                "name": "007-Slabss_v20250922C09b-WB.kmz",
-                "modifiedTime": "2026-10-06T17:51:53.037Z"
-        }
-];
-      let manifest;
-      try {
-        manifest = await fetchDriveBridgeJson(endpoint, {
-          action: 'manifest',
-          mode: 'folder',
-          folderId: selectedFolderId,
-          cacheBust: String(Date.now())
-        });
-        const resultId = String(manifest.folderId || manifest.selectedFolderId || '');
-        const resultName = String(manifest.selectedFolder || '');
-        if ((resultId && resultId !== selectedFolderId) ||
-            (!resultId && /^\\d{8}[A-Za-z]?$/.test(resultName))) {
-          console.warn('Drive bridge ignored selected KMZ folder; using verified folder file IDs.');
-          manifest = null;
-        }
-      } catch (error) {
-        console.warn('Drive folder manifest unavailable; trying verified KMZ file IDs.', error);
-      }
-      if (!manifest && selectedFolderId === DEFAULT_DRIVE_FOLDER_ID) {
-        manifest = {
-          ok: true,
-          selectedFolder: '_001-KML (1001)',
-          folderId: selectedFolderId,
-          files: VERIFIED_KMZ_FOLDER_FILES
-        };
-      }
-      if (!manifest) {
-        throw new Error('No verified KMZ manifest for the selected folder. Update the Drive bridge.');
-      }
-      const allFiles = Array.isArray(manifest.files) ? manifest.files : [];
-      if (!allFiles.length) {
-        status(`No KMZ files found in ${manifest.selectedFolder || selectedFolderId}.`);
-        return;
-      }
-
+      // Static local KMZ assets: no Google Apps Script or Drive runtime dependency.
+      const manifest = {
+        selectedFolder: '_001-KML (1001)',
+        folderId: getSelectedDriveFolderId(),
+        files: [
+          {name:'001-assetsv20250822a.kmz'},
+          {name:'003-supertable_rev0050masterk100.kmz'},
+          {name:'007-Slabss_v20250922C09b-WB.kmz'}
+        ]
+      };
+      const allFiles = manifest.files;
+      status('Loading KMZ files hosted locally with this website...');
       const primaryOnlyToggle = document.getElementById('drivePrimaryLayersOnly');
       const primaryOnly = primaryOnlyToggle ? primaryOnlyToggle.checked : false;
       const files = primaryOnly
@@ -2974,18 +2912,13 @@
             `${loadedCount + 1}/${files.length} — ${item.name}`
           );
 
-          const filePayload = await fetchDriveBridgeJson(endpoint, {
-            action: 'file',
-            id: item.id,
-            cacheBust: String(Date.now())
-          });
-
-          const blob = base64ToBlob(filePayload.base64, filePayload.mimeType);
+          const localUrl = './kmz/' + encodeURIComponent(item.name);
+          const response = await fetch(localUrl, {cache: 'no-store'});
+          if (!response.ok) throw new Error(`Local KMZ HTTP ${response.status}: ${localUrl}`);
+          const blob = await response.blob();
+          if (blob.size < 4) throw new Error('Local KMZ file is empty');
           const file = new File([blob], item.name, {
-            type: filePayload.mimeType || 'application/vnd.google-earth.kmz',
-            lastModified: item.modifiedTime
-              ? Date.parse(item.modifiedTime)
-              : Date.now()
+            type: 'application/vnd.google-earth.kmz'
           });
 
           const loadedSuccessfully = await loadFile(file);
