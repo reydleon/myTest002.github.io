@@ -2033,7 +2033,7 @@
     }
 
 
-    const LAYER_001_ICON_URL = 'assets/layer-001-lightning.png';
+    const LAYER_001_ICON_URL = new URL('./layer-001-lightning.png', document.baseURI).href;
     let searchMatches = [];
     let activeSearchIndex = -1;
     let searchHoverFeature = null;
@@ -5036,7 +5036,7 @@
             row.tabIndex = -1;
 
             const iconHtml = item.code === '001'
-              ? '<img src="layer-001-lightning.png" alt="">'
+              ? `<img src="${LAYER_001_ICON_URL}" alt="">`
               : '<span>●</span>';
 
             row.innerHTML = `
