@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5" />
-  <title>Local KMZ Map Viewer 021.3 Updated Drive Endpoint</title>
+  <title>Local KMZ Map Viewer 023 Dockable Panels</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.6.1/ol.css" />
+  <link rel="stylesheet" href="https://unpkg.com/ol@10.6.1/ol.css" />
   <style>
     :root {
       --panel-width: 330px;
@@ -33,6 +34,13 @@
     }
     .actionbar button { border: 0; background: transparent; cursor: pointer; font-size: 12px; font-weight: 600; color: #555; padding: 0; }
     .actionbar .preview { margin-left: auto; }
+    .drive-source-picker { padding: 7px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .drive-source-picker label { font-size: 11px; white-space: nowrap; }
+    .drive-source-picker select { min-width: 0; max-width: 100%; width: 100%; padding: 5px; font-size: 11px; border: 1px solid #ccc; border-radius: 4px; background: white; }
+    .drive-layer-filter { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12px; color: #555; }
+    .drive-layer-filter label { display: flex; align-items: center; gap: 7px; font-weight: 600; cursor: pointer; }
+    .drive-layer-filter input { margin: 0; }
+    .drive-layer-filter p { margin: 5px 0 0 23px; line-height: 1.35; }
 
     .uploadbar { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 9px 12px; border-bottom: 1px solid var(--border); }
     .uploadbar label, .uploadbar button {
@@ -814,15 +822,604 @@
       }
     }
 
+
+    .searchbox {
+      overflow: visible;
+    }
+
+    .search-results {
+      position: absolute;
+      top: calc(100% + 2px);
+      left: 0;
+      width: 100%;
+      max-height: min(520px, calc(100vh - 140px));
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #c8c8c8;
+      box-shadow: 0 5px 14px rgba(0,0,0,.25);
+      z-index: 140;
+      display: none;
+    }
+
+    .search-results.open {
+      display: block;
+    }
+
+    .search-group-title {
+      padding: 7px 10px 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #666;
+      background: #f5f6f8;
+      border-top: 1px solid #e6e6e6;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .search-result-item {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr) auto;
+      gap: 7px;
+      align-items: center;
+      min-height: 34px;
+      padding: 5px 9px;
+      cursor: pointer;
+      border-top: 1px solid #f0f0f0;
+      background: #fff;
+    }
+
+    .search-result-item:hover,
+    .search-result-item.active {
+      background: #e8f0fe;
+    }
+
+    .search-result-symbol {
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .search-result-symbol img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .search-result-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 1.5px solid #fff;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.18);
+      display: inline-block;
+    }
+
+    .search-result-line {
+      width: 20px;
+      height: 0;
+      border-top: 4px solid currentColor;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .search-result-main {
+      min-width: 0;
+    }
+
+    .search-result-name {
+      display: block;
+      color: #222;
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-result-name mark {
+      background: #fff3a6;
+      color: inherit;
+      padding: 0;
+    }
+
+    .search-result-meta {
+      display: block;
+      color: #858585;
+      font-size: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 1px;
+    }
+
+    .search-result-badge {
+      font-size: 9px;
+      color: #666;
+      background: #f1f3f4;
+      border-radius: 10px;
+      padding: 2px 6px;
+      white-space: nowrap;
+    }
+
+    .search-empty {
+      padding: 13px;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .legend-symbol-image {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      display: inline-block;
+    }
+
+
+    :root {
+      --dock-gap: 6px;
+      --dock-bg: rgba(255,255,255,.97);
+      --dock-border: #aeb4bd;
+      --dock-title: #e9edf2;
+      --dock-title-active: #d7e6fb;
+    }
+
+    .dock-panel {
+      position: fixed;
+      z-index: 90;
+      min-width: 220px;
+      min-height: 120px;
+      background: var(--dock-bg);
+      border: 1px solid var(--dock-border);
+      border-radius: 3px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.24);
+      overflow: hidden;
+      resize: both;
+    }
+
+    .dock-panel.docked {
+      position: fixed;
+      resize: none;
+      border-radius: 0;
+      box-shadow: 0 1px 5px rgba(0,0,0,.18);
+    }
+
+    .dock-panel.collapsed .dock-body {
+      display: none;
+    }
+
+    .dock-panel.collapsed {
+      min-height: 30px !important;
+      height: auto !important;
+      resize: none;
+    }
+
+    .dock-titlebar {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 6px 0 9px;
+      background: var(--dock-title);
+      border-bottom: 1px solid #cfd4da;
+      cursor: move;
+      user-select: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: #222;
+    }
+
+    .dock-panel:focus-within .dock-titlebar,
+    .dock-panel.dragging .dock-titlebar {
+      background: var(--dock-title-active);
+    }
+
+    .dock-title-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .dock-title-actions button {
+      width: 24px;
+      height: 22px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      color: #444;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .dock-title-actions button:hover {
+      background: rgba(0,0,0,.08);
+    }
+
+    .dock-body {
+      height: calc(100% - 30px);
+      overflow: auto;
+      background: #fff;
+    }
+
+    .dock-zone {
+      position: fixed;
+      z-index: 200;
+      display: none;
+      border: 2px dashed #1976d2;
+      background: rgba(25,118,210,.16);
+      pointer-events: none;
+    }
+
+    body.dock-dragging .dock-zone {
+      display: block;
+    }
+
+    #dockZoneLeft {
+      left: 0;
+      top: 0;
+      width: 24vw;
+      height: 100vh;
+    }
+
+    #dockZoneRight {
+      right: 0;
+      top: 0;
+      width: 24vw;
+      height: 100vh;
+    }
+
+    #dockZoneTop {
+      left: 24vw;
+      right: 24vw;
+      top: 0;
+      height: 20vh;
+    }
+
+    #dockZoneBottom {
+      left: 24vw;
+      right: 24vw;
+      bottom: 0;
+      height: 24vh;
+    }
+
+    .dock-toolbar {
+      position: fixed;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 130;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid #c9c9c9;
+      box-shadow: 0 2px 8px rgba(0,0,0,.22);
+      border-radius: 4px;
+    }
+
+    .dock-toolbar button,
+    .dock-toolbar select {
+      height: 30px;
+      border: 1px solid #c8c8c8;
+      background: #fff;
+      font-size: 11px;
+      padding: 0 8px;
+    }
+
+    .dock-toolbar button {
+      cursor: pointer;
+    }
+
+    .dock-menu {
+      position: fixed;
+      top: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 131;
+      width: 240px;
+      background: #fff;
+      border: 1px solid #c7c7c7;
+      box-shadow: 0 5px 15px rgba(0,0,0,.28);
+      padding: 8px;
+      display: none;
+    }
+
+    .dock-menu.open {
+      display: block;
+    }
+
+    .dock-menu label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 2px;
+      font-size: 12px;
+    }
+
+    .dock-menu hr {
+      border: 0;
+      border-top: 1px solid #e5e5e5;
+      margin: 6px 0;
+    }
+
+    .dock-workspace-status {
+      color: #666;
+      font-size: 10px;
+      margin-left: 4px;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dock-placeholder {
+      padding: 10px;
+      font-size: 12px;
+      color: #555;
+    }
+
+    @media (max-width: 760px) {
+      .dock-panel {
+        left: 6px !important;
+        right: 6px !important;
+        top: auto !important;
+        bottom: 6px !important;
+        width: auto !important;
+        max-height: 60vh;
+        resize: vertical;
+      }
+
+      .dock-panel.docked {
+        width: auto !important;
+        height: 48vh !important;
+      }
+
+      .dock-toolbar {
+        left: 8px;
+        right: 8px;
+        transform: none;
+        overflow-x: auto;
+        justify-content: flex-start;
+      }
+
+      .dock-menu {
+        left: 8px;
+        right: 8px;
+        width: auto;
+        transform: none;
+      }
+    }
+
+
+    /* Revision 23.2 compact layer controls */
+    #sidebar button,
+    #sidebar .btn,
+    #sidebar input[type="button"] {
+      min-height: 28px !important;
+      height: 28px !important;
+      padding: 0 7px !important;
+      font-size: 11px !important;
+      line-height: 1 !important;
+      border-radius: 3px !important;
+    }
+
+    #sidebar .toolbar,
+    #sidebar .button-row,
+    #sidebar .layer-actions,
+    #sidebar .folder-actions {
+      gap: 4px !important;
+      margin: 4px 0 !important;
+    }
+
+    #sidebar .toolbar button,
+    #sidebar .layer-actions button,
+    #sidebar .folder-actions button {
+      min-width: 34px !important;
+      width: auto !important;
+    }
+
+    #sidebar .action-grid {
+      grid-template-columns: repeat(auto-fit, minmax(38px, 1fr)) !important;
+      gap: 4px !important;
+    }
+
+    #sidebar .action-grid button {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-height: 40px !important;
+      height: 40px !important;
+      padding: 3px 4px !important;
+      font-size: 10px !important;
+      white-space: nowrap !important;
+    }
+
+    #sidebar .action-grid button .icon,
+    #sidebar .action-grid button span:first-child {
+      font-size: 14px !important;
+      margin: 0 !important;
+    }
+
+    #sidebar h1,
+    #sidebar h2,
+    #sidebar h3,
+    #sidebar .section-title {
+      font-size: 12px !important;
+      margin: 5px 0 !important;
+    }
+
+    /* My Maps-like search */
+    .searchbox {
+      min-height: 58px !important;
+      height: auto !important;
+    }
+
+    .searchbox input[type="search"],
+    .searchbox input[type="text"] {
+      height: 38px !important;
+      font-size: 14px !important;
+      padding: 0 42px 0 12px !important;
+      border: 1px solid #c9cdd2 !important;
+      border-radius: 3px !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,.18) !important;
+    }
+
+    .searchbox button {
+      width: 40px !important;
+      min-width: 40px !important;
+      height: 38px !important;
+      padding: 0 !important;
+      font-size: 17px !important;
+    }
+
+    #searchResults,
+    .search-results {
+      background: #fff !important;
+      border-top: 1px solid #e5e7ea !important;
+      max-height: 360px !important;
+      overflow-y: auto !important;
+      box-shadow: 0 4px 10px rgba(0,0,0,.18) !important;
+    }
+
+    .mymaps-search-group {
+      padding: 7px 10px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #6b7280;
+      background: #f7f8fa;
+      border-top: 1px solid #eceff2;
+    }
+
+    .mymaps-search-row {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 5px 9px;
+      cursor: pointer;
+      border-bottom: 1px solid #eef0f2;
+      background: #fff;
+    }
+
+    .mymaps-search-row:hover,
+    .mymaps-search-row.active {
+      background: #eef5ff;
+    }
+
+    .mymaps-search-icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .mymaps-search-icon img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+
+    .mymaps-search-main {
+      min-width: 0;
+    }
+
+    .mymaps-search-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #222;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mymaps-search-subtitle {
+      margin-top: 2px;
+      font-size: 10px;
+      color: #777;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mymaps-search-badge {
+      min-width: 28px;
+      padding: 2px 5px;
+      border-radius: 10px;
+      background: #eef1f4;
+      color: #4b5563;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .mymaps-search-empty {
+      padding: 14px;
+      color: #777;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    mark {
+      background: #fff2a8;
+      color: inherit;
+      padding: 0;
+    }
+
 </style>
 </head>
 <body>
   <div id="map"></div>
 
-  <button id="windowManagerBtn" class="window-manager-btn"
+  <div id="dockToolbar" class="dock-toolbar" aria-label="Workspace controls">
+    <button id="dockPanelsBtn" type="button">View ▾</button>
+    <select id="workspacePreset" title="Workspace preset">
+      <option value="construction">Workspace</option>
+      <option value="markup">Markup</option>
+      <option value="qaqc">QA/QC</option>
+      <option value="field">Field Mode</option>
+      <option value="minimal">Minimal Map</option>
+      <option value="custom">Custom</option>
+    </select>
+    <button id="applyWorkspaceBtn" type="button">▶</button>
+    <button id="saveLayoutBtn" type="button">💾</button>
+    <button id="resetLayoutBtn" type="button">↺</button>
+    <span id="dockWorkspaceStatus" class="dock-workspace-status">Workspace</span>
+  </div>
+
+  <div id="dockMenu" class="dock-menu">
+    <strong>Panels</strong>
+    <label><input type="checkbox" data-dock-panel="layers" checked> Layers</label>
+    <label><input type="checkbox" data-dock-panel="search" checked> Search</label>
+    <label><input type="checkbox" data-dock-panel="legend" checked> Status</label>
+    <label><input type="checkbox" data-dock-panel="drawing" checked> Drawing Tools</label>
+    <label><input type="checkbox" data-dock-panel="style" checked> Drawing Style</label>
+    <label><input type="checkbox" data-dock-panel="maptools" checked> Map Tools</label>
+    <label><input type="checkbox" data-dock-panel="coordinates" checked> Coordinates</label>
+    <hr>
+    <button id="floatAllBtn" type="button">Float All</button>
+    <button id="dockDefaultBtn" type="button">Default Docking</button>
+  </div>
+
+  <div id="dockZoneLeft" class="dock-zone"></div>
+  <div id="dockZoneRight" class="dock-zone"></div>
+  <div id="dockZoneTop" class="dock-zone"></div>
+  <div id="dockZoneBottom" class="dock-zone"></div>
+
+
+  <button id="windowManagerBtn" class="window-manager-btn" style="display:none"
     type="button" title="Show or hide windows">▣</button>
 
-  <div id="windowManager" class="window-manager" aria-label="Window visibility">
+  <div id="windowManager" class="window-manager" style="display:none" aria-label="Window visibility">
     <div class="window-manager-header">
       <span>Show / Hide Windows</span>
       <button id="windowManagerClose" type="button">×</button>
@@ -857,10 +1454,25 @@
       <button id="addLayerBtn">◆ Add layer</button>
       <button id="openDriveFolderBtn" type="button">☁ Open Parent</button>
       <button id="driveEndpointBtn" type="button">⚙ Change Endpoint</button>
-      <button id="reloadDefaultBtn" type="button">↻ Reload 20260718A</button>
+      <button id="reloadDefaultBtn" type="button">↻ Reload Folder</button>
       <button id="reloadDriveBtn" type="button">⇧ Load Latest</button>
       <button>↗ Share</button>
       <button class="preview">◉ Preview</button>
+    </div>
+
+    <div class="drive-source-picker">
+      <label for="driveFolderSelect">KMZ source</label>
+      <select id="driveFolderSelect" aria-label="Google Drive KMZ source">
+        <option value="1t2gMvS_uJzQSaT2RWtcVxaWPEinmyxIm">1001-1t2gMvS_uJzQSaT2RWtcVxaWPEinmyxIm</option>
+      </select>
+    </div>
+
+    <div class="drive-layer-filter">
+      <label for="drivePrimaryLayersOnly">
+        <input id="drivePrimaryLayersOnly" type="checkbox" />
+        <span>Load primary layers only</span>
+      </label>
+      <p id="drivePrimaryLayersHelp">All available KMZ layers will be loaded.</p>
     </div>
 
     <div class="uploadbar">
@@ -880,8 +1492,12 @@
   </aside>
 
   <div class="searchbox">
-    <input id="searchInput" placeholder="Search layer names or feature attributes" />
+    <input id="searchInput" placeholder="Search..."
+      autocomplete="off" aria-expanded="false" aria-controls="searchResults" />
     <button id="searchBtn">⌕</button>
+
+    <div id="searchResults" class="search-results" role="listbox"
+      aria-label="Search results"></div>
   </div>
 
   <div class="tools">
@@ -908,8 +1524,8 @@
     <div id="popupContent"></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/ol@10.6.1/dist/ol.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ol@10.6.1/dist/ol.js" onerror="this.onerror=null;this.src='https://unpkg.com/ol@10.6.1/dist/ol.js'"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/jszip@3.10.1/dist/jszip.min.js'"></script>
 
   <div class="markup-toolbar" id="markupToolbar" aria-label="Markup tools">
     <button id="mkSelect" title="Select and move (S)">⬚</button>
@@ -1014,7 +1630,7 @@
       </div>
       <div class="modal-actions">
         <button id="styleCancelBtn">Cancel</button>
-        <button id="styleApplyBtn" class="primary">Apply</button>
+        <button id="style▶Btn" class="primary">▶</button>
       </div>
     </div>
   </div>
@@ -1024,7 +1640,7 @@
 
   <section id="statusLegend" class="status-legend" aria-label="Construction status legend">
     <div class="legend-header">
-      <span>Construction Status</span>
+      <span>Status</span>
       <button id="legendCollapseBtn" title="Collapse legend">−</button>
       <button id="legendHideBtn" title="Hide legend">×</button>
     </div>
@@ -1055,6 +1671,10 @@
 
 
   <script>
+    if (!window.ol || !window.JSZip) {
+      document.body.innerHTML = `<main style="font-family:Arial,sans-serif;max-width:760px;margin:60px auto;padding:24px"><h1>KMZ Viewer could not start</h1><p>The mapping libraries could not be downloaded. Confirm that the browser has internet access and that jsDelivr or unpkg is not blocked, then refresh the page.</p><p><a href="/">Return to reydleon.ca</a></p></main>`;
+      throw new Error("Required libraries OpenLayers or JSZip are unavailable.");
+    }
     const initialCenter = ol.proj.fromLonLat([-113.6293610793858, 53.529216636355244]);
 
     const satellite = new ol.layer.Tile({
@@ -1408,6 +2028,215 @@
       };
     }
 
+
+    const LAYER_001_ICON_URL = 'assets/layer-001-lightning.png';
+    let searchMatches = [];
+    let activeSearchIndex = -1;
+    let searchHoverFeature = null;
+    let searchHoverLayer = null;
+
+    const searchHighlightLayer = new ol.layer.Vector({
+      source: new ol.source.Vector(),
+      style: feature => {
+        const geometryType = feature.getGeometry()?.getType();
+        if (geometryType === 'Point' || geometryType === 'MultiPoint') {
+          return new ol.style.Style({
+            image: new ol.style.Circle({
+              radius: 13,
+              fill: new ol.style.Fill({color:'rgba(255,235,59,.25)'}),
+              stroke: new ol.style.Stroke({color:'#ffeb3b', width:4})
+            })
+          });
+        }
+        return new ol.style.Style({
+          stroke: new ol.style.Stroke({color:'#ffeb3b', width:8}),
+          fill: new ol.style.Fill({color:'rgba(255,235,59,.2)'})
+        });
+      }
+    });
+    map.addLayer(searchHighlightLayer);
+
+    function isLayer001(layerOrFileName) {
+      const name = typeof layerOrFileName === 'string'
+        ? layerOrFileName
+        : String(layerOrFileName?.get?.('fileName') || '');
+      return /^001[-_]/i.test(name);
+    }
+
+    function getFeatureDisplayName(feature, fallback = 'Unnamed feature') {
+      const candidates = [
+        feature.get('Name'),
+        feature.get('name'),
+        feature.get('TITLE'),
+        feature.get('Title'),
+        feature.get('title'),
+        feature.get('LABEL'),
+        feature.get('Label'),
+        feature.get('label'),
+        feature.get('Slab ID'),
+        feature.get('SlabID'),
+        feature.get('Slab_ID')
+      ];
+      const value = candidates.find(item =>
+        item !== null && item !== undefined && String(item).trim() !== ''
+      );
+      return value === undefined ? fallback : String(value);
+    }
+
+    function escapeRegExp(value) {
+      return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function highlightedText(value, query) {
+      const text = String(value || '');
+      if (!query) return esc(text);
+      const regex = new RegExp(`(${escapeRegExp(query)})`, 'ig');
+      return esc(text).replace(regex, '<mark>$1</mark>');
+    }
+
+    function featureSearchText(feature, layer) {
+      const values = Object.entries(feature.getProperties())
+        .filter(([key, value]) =>
+          key !== 'geometry' &&
+          (typeof value === 'string' || typeof value === 'number')
+        )
+        .map(([, value]) => String(value));
+
+      values.push(String(layer.get('fileName') || ''));
+      return values.join(' ').toLowerCase();
+    }
+
+    function getLayerShortName(layer) {
+      const fileName = String(layer.get('fileName') || '');
+      const match = fileName.match(/^(\d{3})[-_]/);
+      return match ? match[1] : fileName.replace(/\.kmz$/i, '').slice(0, 12);
+    }
+
+    function getFeatureTypeText(feature, layer) {
+      const preferredFields = ['Type', 'TYPE', 'Asset Type', 'AssetType', 'StatusA'];
+      for (const field of preferredFields) {
+        const value = feature.get(field);
+        if (value !== null && value !== undefined && String(value).trim() !== '') {
+          return String(value);
+        }
+      }
+      return feature.getGeometry()?.getType() || layer.get('styleLabel') || '';
+    }
+
+    function getSearchSymbolHtml(feature, layer) {
+      if (isLayer001(layer)) {
+        return `<img src="${LAYER_001_ICON_URL}" alt="">`;
+      }
+
+      const geometryType = feature.getGeometry()?.getType() || '';
+      const color = layer.get('color') || '#3367d6';
+
+      if (/LineString/.test(geometryType)) {
+        return `<span class="search-result-line" style="color:${esc(color)}"></span>`;
+      }
+
+      return `<span class="search-result-dot" style="background:${esc(color)}"></span>`;
+    }
+
+    function clearSearchHighlight() {
+      searchHighlightLayer.getSource().clear();
+      searchHoverFeature = null;
+      searchHoverLayer = null;
+    }
+
+    function previewSearchResult(match) {
+      clearSearchHighlight();
+      if (!match?.feature?.getGeometry()) return;
+      searchHoverFeature = match.feature;
+      searchHoverLayer = match.layer;
+      const clone = match.feature.clone();
+      searchHighlightLayer.getSource().addFeature(clone);
+    }
+
+    function activateSearchResult(match) {
+      if (!match) return;
+      const extent = match.feature.getGeometry().getExtent();
+      map.getView().fit(extent, {
+        padding:[110,110,110,420],
+        maxZoom:19,
+        duration:450
+      });
+      previewSearchResult(match);
+      status(`Selected ${match.name} from ${match.layer.get('fileName')}.`);
+      document.getElementById('searchResults').classList.remove('open');
+    }
+
+    function renderSearchResults(query) {
+      const resultsElement = document.getElementById('searchResults');
+      resultsElement.innerHTML = '';
+      activeSearchIndex = -1;
+
+      if (!searchMatches.length) {
+        resultsElement.innerHTML =
+          `<div class="search-empty">No results found for “${esc(query)}”.</div>`;
+        resultsElement.classList.add('open');
+        return;
+      }
+
+      const groups = new Map();
+      searchMatches.forEach(match => {
+        const layerName = match.layer.get('fileName') || 'Layer';
+        if (!groups.has(layerName)) groups.set(layerName, []);
+        groups.get(layerName).push(match);
+      });
+
+      let globalIndex = 0;
+
+      groups.forEach((matches, layerName) => {
+        const groupTitle = document.createElement('div');
+        groupTitle.className = 'search-group-title';
+        groupTitle.textContent = `${layerName} (${matches.length})`;
+        resultsElement.appendChild(groupTitle);
+
+        matches.forEach(match => {
+          const item = document.createElement('div');
+          item.className = 'search-result-item';
+          item.dataset.searchIndex = String(globalIndex);
+          item.setAttribute('role', 'option');
+
+          item.innerHTML = `
+            <span class="search-result-symbol">${getSearchSymbolHtml(match.feature, match.layer)}</span>
+            <span class="search-result-main">
+              <span class="search-result-name">${highlightedText(match.name, query)}</span>
+              <span class="search-result-meta">${esc(match.typeText)}</span>
+            </span>
+            <span class="search-result-badge">${esc(getLayerShortName(match.layer))}</span>
+          `;
+
+          item.addEventListener('mouseenter', () => {
+            activeSearchIndex = Number(item.dataset.searchIndex);
+            updateActiveSearchItem();
+            previewSearchResult(match);
+          });
+
+          item.addEventListener('click', () => activateSearchResult(match));
+          resultsElement.appendChild(item);
+          globalIndex += 1;
+        });
+      });
+
+      resultsElement.classList.add('open');
+    }
+
+    function updateActiveSearchItem() {
+      const items = [...document.querySelectorAll('.search-result-item')];
+      items.forEach((item, index) => {
+        const active = index === activeSearchIndex;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-selected', active ? 'true' : 'false');
+        if (active) item.scrollIntoView({block:'nearest'});
+      });
+
+      if (activeSearchIndex >= 0 && searchMatches[activeSearchIndex]) {
+        previewSearchResult(searchMatches[activeSearchIndex]);
+      }
+    }
+
     async function getKml(file) {
       if (file.name.toLowerCase().endsWith('.kml')) return await file.text();
       const zip = await JSZip.loadAsync(await file.arrayBuffer());
@@ -1493,7 +2322,9 @@
         // - OFF for line/multiline/polygon-only layers
         // - OFF for high-density layers
         // - ON for ordinary point layers
+        const isAssetLayer001 = /^001[-_]/i.test(file.name);
         const showLabels =
+          !isAssetLayer001 &&
           !isSlabLayer &&
           !containsOnlyLinesOrPolygons &&
           !highDensityLayer;
@@ -1547,6 +2378,24 @@
           styleAnalysis.label = `Uniform style (${features.length.toLocaleString()} features; labels on click)`;
         }
 
+        if (isAssetLayer001) {
+          styleAnalysis.mode = 'uniform';
+          styleAnalysis.label = 'Uniform style';
+          styleAnalysis.field = null;
+          styleAnalysis.numeric = false;
+          categories = [];
+          const iconStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+              src: LAYER_001_ICON_URL,
+              anchor: [0.5, 0.5],
+              anchorXUnits: 'fraction',
+              anchorYUnits: 'fraction',
+              scale: window.matchMedia('(max-width: 760px)').matches ? 0.20 : 0.17
+            })
+          });
+          layerStyle = () => iconStyle;
+        }
+
         const layer = new ol.layer.Vector({
           source,
           style: layerStyle,
@@ -1572,10 +2421,12 @@
         addLayerFolder(layer);
         fitLayer(layer);
         status(`${file.name}: ${features.length} feature(s) loaded.`);
+        return true;
       } catch (e) {
         console.error(e);
         status(`Could not load ${file.name}: ${e.message}`);
-        alert(`Could not load ${file.name}\n\n${e.message}`);
+        console.warn(`Could not load ${file.name}: ${e.message}`);
+        return false;
       }
     }
 
@@ -1689,9 +2540,17 @@
         row.className = 'layer-row';
 
         const spacer = document.createElement('span');
-        const symbol = document.createElement('span');
-        symbol.className = 'symbol pin';
-        symbol.style.background = color;
+        let symbol;
+        if (isLayer001(layer)) {
+          symbol = document.createElement('img');
+          symbol.className = 'legend-symbol-image';
+          symbol.src = LAYER_001_ICON_URL;
+          symbol.alt = '';
+        } else {
+          symbol = document.createElement('span');
+          symbol.className = 'symbol pin';
+          symbol.style.background = color;
+        }
 
         const label = document.createElement('span');
         label.className = 'layer-label';
@@ -1784,25 +2643,52 @@
       if (!ol.extent.isEmpty(extent)) map.getView().fit(extent, {padding:[70,70,70,390], maxZoom:18, duration:450});
     }
 
+
     function searchFeatures() {
-      const q = document.getElementById('searchInput').value.trim().toLowerCase();
-      if (!q) return;
-      for (const layer of uploaded) {
-        for (const feature of layer.getSource().getFeatures()) {
-          const text = Object.values(feature.getProperties()).map(v => {
-            if (typeof v === 'string' || typeof v === 'number') return String(v);
-            return '';
-          }).join(' ').toLowerCase();
-          if (text.includes(q)) {
-            const extent = feature.getGeometry().getExtent();
-            map.getView().fit(extent, {padding:[120,120,120,420], maxZoom:18, duration:450});
-            status(`Found "${q}" in ${layer.get('fileName')}.`);
-            return;
-          }
-        }
+      const input = document.getElementById('searchInput');
+      const rawQuery = input.value.trim();
+      const query = rawQuery.toLowerCase();
+
+      clearSearchHighlight();
+
+      if (!query) {
+        searchMatches = [];
+        document.getElementById('searchResults').classList.remove('open');
+        return;
       }
-      status(`No feature found for "${q}".`);
+
+      const matches = [];
+
+      uploaded.forEach(layer => {
+        layer.getSource().getFeatures().forEach(feature => {
+          const searchable = featureSearchText(feature, layer);
+          if (!searchable.includes(query)) return;
+
+          matches.push({
+            feature,
+            layer,
+            name: getFeatureDisplayName(feature),
+            typeText: getFeatureTypeText(feature, layer)
+          });
+        });
+      });
+
+      matches.sort((a, b) => {
+        const layerCompare = String(a.layer.get('fileName'))
+          .localeCompare(String(b.layer.get('fileName')), undefined, {numeric:true});
+        if (layerCompare !== 0) return layerCompare;
+        return a.name.localeCompare(b.name, undefined, {numeric:true});
+      });
+
+      searchMatches = matches.slice(0, 250);
+      renderSearchResults(rawQuery);
+      status(
+        searchMatches.length
+          ? `${searchMatches.length} result(s) found for “${rawQuery}”.`
+          : `No feature found for “${rawQuery}”.`
+      );
     }
+
 
     map.on('singleclick', evt => {
       const hit = map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => ({feature, layer}), {
@@ -1866,8 +2752,13 @@
 
 
 
-    const DRIVE_PARENT_FOLDER_URL =
-      'https://drive.google.com/drive/folders/1t2gMvS_uJzQSaT2RWtcVxaWPEinmyxIm?usp=sharing';
+    const DEFAULT_DRIVE_FOLDER_ID = '1t2gMvS_uJzQSaT2RWtcVxaWPEinmyxIm';
+    function getSelectedDriveFolderId() {
+      return document.getElementById('driveFolderSelect')?.value || DEFAULT_DRIVE_FOLDER_ID;
+    }
+    function getSelectedDriveFolderUrl() {
+      return `https://drive.google.com/drive/folders/${encodeURIComponent(getSelectedDriveFolderId())}`;
+    }
 
     const DRIVE_ENDPOINT_STORAGE_KEY = 'kmzViewerDriveBridgeEndpoint';
     const DEFAULT_DRIVE_BRIDGE_ENDPOINT =
@@ -1886,7 +2777,7 @@
       const current = getDriveBridgeEndpoint();
       const entered = window.prompt(
         'Paste the deployed Google Apps Script Web App /exec URL.\n\n' +
-        'This endpoint reads the newest YYYYMMDD folder from the parent Drive folder.',
+        'This endpoint must list KMZ files in the configured _001-KML Drive folder.',
         current
       );
 
@@ -1911,12 +2802,23 @@
         url.searchParams.set(key, value);
       });
 
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        mode: 'cors',
-        cache: 'no-store',
-        redirect: 'follow'
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 75000);
+      let response;
+      try {
+        response = await fetch(url.toString(), {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-store',
+          redirect: 'follow',
+          signal: controller.signal
+        });
+      } catch (error) {
+        if (controller.signal.aborted) throw new Error('Drive bridge timed out after 75 seconds');
+        throw error;
+      } finally {
+        clearTimeout(timeout);
+      }
 
       if (!response.ok) {
         throw new Error(`Drive bridge HTTP ${response.status}`);
@@ -1929,6 +2831,23 @@
       }
 
       return payload;
+    }
+
+    const DRIVE_PRIMARY_LAYER_CODES = ['001', '002', '003', '004'];
+    const DRIVE_PRIMARY_LAYER_PATTERN = /^(001|002|003|004)(?=\D|$)/;
+
+    function getDrivePrimaryLayerCode(name) {
+      const match = String(name || '').trim().match(DRIVE_PRIMARY_LAYER_PATTERN);
+      return match ? match[1] : null;
+    }
+
+    function updateDriveLayerFilterHelp() {
+      const toggle = document.getElementById('drivePrimaryLayersOnly');
+      const help = document.getElementById('drivePrimaryLayersHelp');
+      if (!toggle || !help) return;
+      help.textContent = toggle.checked
+        ? 'Only layers 001, 002, 003, and 004 will be loaded.'
+        : 'All available layers will be loaded.';
     }
 
     function base64ToBlob(base64, mimeType) {
@@ -1944,7 +2863,7 @@
       });
     }
 
-    async function loadDriveRevision(mode = 'default', forceEndpointPrompt = false) {
+    async function loadDriveRevision(mode = 'folder', forceEndpointPrompt = false) {
       let endpoint = getDriveBridgeEndpoint();
 
       if (!endpoint || forceEndpointPrompt) {
@@ -1960,25 +2879,83 @@
 
       status(
         mode === 'latest'
-          ? 'Checking the parent Drive folder for the newest dated revision...'
-          : 'Loading default Drive revision 20260718A...'
+          ? 'Checking Google Drive for the latest available files...'
+          : 'Loading KMZ files from the configured _001-KML folder...'
       );
 
-      const manifest = await fetchDriveBridgeJson(endpoint, {
-        action: 'manifest',
-        mode: mode,
-        cacheBust: String(Date.now())
-      });
+      const selectedFolderId = getSelectedDriveFolderId();
+      // Verified Google Drive file IDs for the 1001 _001-KML folder.
+      // Use these when the deployed Apps Script still points to dated revision 20260718A.
+      const VERIFIED_KMZ_FOLDER_FILES = [
+        {
+                "id": "1sENd8VTWnRN9ZhTdBBabeBQoa2vNi3QV",
+                "name": "001-assetsv20250822a.kmz",
+                "modifiedTime": "2026-07-19T07:45:02.000Z"
+        },
+        {
+                "id": "1Mii8xE2Fq5KGPDW1vHyPdjav-rNG1q6-",
+                "name": "003-supertable_rev0050masterk100.kmz",
+                "modifiedTime": "2026-07-19T07:48:12.000Z"
+        },
+        {
+                "id": "1FOZEEGgwKqRQU35W4X5HO6Z8krP9LFpb",
+                "name": "007-Slabss_v20250922C09b-WB.kmz",
+                "modifiedTime": "2026-10-06T17:51:53.037Z"
+        }
+];
+      let manifest;
+      try {
+        manifest = await fetchDriveBridgeJson(endpoint, {
+          action: 'manifest',
+          mode: 'folder',
+          folderId: selectedFolderId,
+          cacheBust: String(Date.now())
+        });
+        const resultId = String(manifest.folderId || manifest.selectedFolderId || '');
+        const resultName = String(manifest.selectedFolder || '');
+        if ((resultId && resultId !== selectedFolderId) ||
+            (!resultId && /^\\d{8}[A-Za-z]?$/.test(resultName))) {
+          console.warn('Drive bridge ignored selected KMZ folder; using verified folder file IDs.');
+          manifest = null;
+        }
+      } catch (error) {
+        console.warn('Drive folder manifest unavailable; trying verified KMZ file IDs.', error);
+      }
+      if (!manifest && selectedFolderId === DEFAULT_DRIVE_FOLDER_ID) {
+        manifest = {
+          ok: true,
+          selectedFolder: '_001-KML (1001)',
+          folderId: selectedFolderId,
+          files: VERIFIED_KMZ_FOLDER_FILES
+        };
+      }
+      if (!manifest) {
+        throw new Error('No verified KMZ manifest for the selected folder. Update the Drive bridge.');
+      }
+      const allFiles = Array.isArray(manifest.files) ? manifest.files : [];
+      if (!allFiles.length) {
+        status(`No KMZ files found in ${manifest.selectedFolder || selectedFolderId}.`);
+        return;
+      }
 
-      const files = Array.isArray(manifest.files) ? manifest.files : [];
+      const primaryOnlyToggle = document.getElementById('drivePrimaryLayersOnly');
+      const primaryOnly = primaryOnlyToggle ? primaryOnlyToggle.checked : false;
+      const files = primaryOnly
+        ? allFiles.filter(item => getDrivePrimaryLayerCode(item.name))
+        : allFiles;
+      const foundPrimaryCodes = new Set(
+        files.map(item => getDrivePrimaryLayerCode(item.name)).filter(Boolean)
+      );
 
-      if (!files.length) {
-        status(`No KMZ files found in ${manifest.selectedFolder}.`);
+      if (primaryOnly && !files.length) {
+        status(
+          'No primary layers were found. Expected layers beginning with 001, 002, 003, or 004.'
+        );
         return;
       }
 
       status(
-        `Selected Drive revision ${manifest.selectedFolder}; loading ${files.length} KMZ files...`
+        `Selected Drive folder ${manifest.selectedFolder || getSelectedDriveFolderId()}; loading ${files.length} KMZ files...`
       );
 
       let loadedCount = 0;
@@ -1987,7 +2964,7 @@
       for (const item of files) {
         try {
           status(
-            `Revision ${manifest.selectedFolder}: ` +
+            `Folder ${manifest.selectedFolder || getSelectedDriveFolderId()}: ` +
             `${loadedCount + 1}/${files.length} — ${item.name}`
           );
 
@@ -2005,7 +2982,11 @@
               : Date.now()
           });
 
-          await loadFile(file);
+          const loadedSuccessfully = await loadFile(file);
+          if (!loadedSuccessfully) {
+            failures.push(`${item.name}: KML/KMZ parsing or rendering failed`);
+            continue;
+          }
           loadedCount += 1;
         } catch (error) {
           console.error(`Failed to load ${item.name}`, error);
@@ -2019,47 +3000,66 @@
 
       if (failures.length) {
         status(
-          `Revision ${manifest.selectedFolder}: ${loadedCount}/${files.length} loaded; ` +
+          `Folder ${manifest.selectedFolder}: ${loadedCount}/${files.length} loaded; ` +
           `${failures.length} failed.`
         );
-        alert(
-          `Selected revision: ${manifest.selectedFolder}\n\n` +
-          `${loadedCount}/${files.length} KMZ files loaded.\n\n` +
-          `Failures:\n${failures.join('\n')}`
+        console.warn(`Folder ${manifest.selectedFolder}: ${loadedCount}/${files.length} KMZ files loaded. Failures: ${failures.join('; ')}`);
+      } else if (primaryOnly) {
+        const missingPrimaryCodes = DRIVE_PRIMARY_LAYER_CODES.filter(
+          code => !foundPrimaryCodes.has(code)
         );
+        if (missingPrimaryCodes.length) {
+          status(`Loaded available primary layers. Missing: ${missingPrimaryCodes.join(', ')}.`);
+        } else {
+          status('Loaded 4 primary layers from Google Drive. Other layers were skipped.');
+        }
       } else {
         status(
-          `Revision ${manifest.selectedFolder}: all ${loadedCount} KMZ files loaded.`
+          `Folder ${manifest.selectedFolder}: all ${loadedCount} KMZ files loaded.`
         );
       }
 
       const revisionElement = document.getElementById('activeDriveRevision');
       if (revisionElement) {
-        revisionElement.textContent = `Drive revision: ${manifest.selectedFolder}`;
+        revisionElement.textContent = `Drive folder: ${manifest.selectedFolder || getSelectedDriveFolderId()}`;
       }
     }
 
+    document.getElementById('driveFolderSelect').addEventListener('change', () => {
+      status(`KMZ source selected: ${getSelectedDriveFolderId()}. Reloading...`);
+      loadDriveRevision('folder', false).catch(error => {
+        console.error(error);
+        status(`Drive loading failed: ${error.message}`);
+      });
+    });
+
+    document.getElementById('drivePrimaryLayersOnly').addEventListener(
+      'change',
+      updateDriveLayerFilterHelp
+    );
+    updateDriveLayerFilterHelp();
+
     window.addEventListener('load', () => {
-      window.setTimeout(() => loadDriveRevision('default', false), 300);
+      window.setTimeout(() => loadDriveRevision('folder', false).catch(error => {
+        console.error('KMZ startup load failed', error);
+        status(`Drive loading failed: ${error.message}`);
+      }), 300);
     });
 
     document.getElementById('driveEndpointBtn').onclick = () => {
       const endpoint = configureDriveBridgeEndpoint();
       if (endpoint) {
-        status('Drive endpoint saved. Click “Reload 20260718A” or “Load Latest”.');
+        status('Drive endpoint saved. Click Reload Folder to load KMZ files.');
       }
     };
 
     document.getElementById('reloadDefaultBtn').onclick = async () => {
       try {
-        await loadDriveRevision('default', false);
+        await loadDriveRevision('folder', false);
       } catch (error) {
         console.error(error);
         status(`Drive loading failed: ${error.message}`);
-        alert(
-          `Drive loading failed:\n\n${error.message}\n\n` +
-          `Confirm that the Apps Script deployment is public and that you pasted its /exec URL.`
-        );
+        console.warn(`Drive loading failed: ${error.message}. Check the Apps Script /exec URL and deployment access.`);
       }
     };
 
@@ -2069,15 +3069,12 @@
       } catch (error) {
         console.error(error);
         status(`Drive loading failed: ${error.message}`);
-        alert(
-          `Drive loading failed:\n\n${error.message}\n\n` +
-          `Confirm that the Apps Script deployment is public and that you pasted its /exec URL.`
-        );
+        console.warn(`Drive loading failed: ${error.message}. Check the Apps Script /exec URL and deployment access.`);
       }
     };
 
     document.getElementById('openDriveFolderBtn').onclick = () => {
-      window.open(DRIVE_PARENT_FOLDER_URL, '_blank', 'noopener');
+      window.open(getSelectedDriveFolderUrl(), '_blank', 'noopener');
     };
 
     document.getElementById('fileInput').addEventListener('change', async e => {
@@ -2087,7 +3084,54 @@
     document.getElementById('addLayerBtn').onclick = () => document.getElementById('fileInput').click();
     document.getElementById('fitAllBtn').onclick = fitAll;
     document.getElementById('searchBtn').onclick = searchFeatures;
-    document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchFeatures(); });
+
+    document.getElementById('searchInput').addEventListener('input', () => {
+      window.clearTimeout(window.__searchDebounce);
+      window.__searchDebounce = window.setTimeout(searchFeatures, 120);
+    });
+
+    document.getElementById('searchInput').addEventListener('keydown', event => {
+      const resultsElement = document.getElementById('searchResults');
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        if (!searchMatches.length) searchFeatures();
+        activeSearchIndex = Math.min(activeSearchIndex + 1, searchMatches.length - 1);
+        updateActiveSearchItem();
+        resultsElement.classList.add('open');
+        return;
+      }
+
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        activeSearchIndex = Math.max(activeSearchIndex - 1, 0);
+        updateActiveSearchItem();
+        return;
+      }
+
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (activeSearchIndex >= 0 && searchMatches[activeSearchIndex]) {
+          activateSearchResult(searchMatches[activeSearchIndex]);
+        } else {
+          searchFeatures();
+        }
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        resultsElement.classList.remove('open');
+        clearSearchHighlight();
+      }
+    });
+
+    document.addEventListener('click', event => {
+      const searchBox = document.querySelector('.searchbox');
+      if (!searchBox.contains(event.target)) {
+        document.getElementById('searchResults').classList.remove('open');
+        clearSearchHighlight();
+      }
+    });
 
     document.getElementById('popupClose').onclick = () => {
       overlay.setPosition(undefined);
@@ -2776,7 +3820,7 @@
     };
     document.getElementById('styleLayerSelect').onchange = refreshStyleFields;
     document.getElementById('styleCancelBtn').onclick = () => document.getElementById('styleModalBackdrop').classList.remove('open');
-    document.getElementById('styleApplyBtn').onclick = applyStyleSettings;
+    document.getElementById('style▶Btn').onclick = applyStyleSettings;
 
     document.getElementById('measureBtn').onclick =
       () => startDraw('LineString', true, 'measureBtn');
@@ -3212,6 +4256,530 @@
 
 
   <script>
+
+    // ---------------------------------------------------------------------
+    // Revision 23 dockable-panel manager
+    // ---------------------------------------------------------------------
+    (function setupDockablePanels() {
+      const STORAGE_KEY = 'kmzViewerDockLayoutV23';
+
+      const panelDefinitions = [
+        {
+          id: 'layers',
+          title: 'Layers',
+          selector: '#sidebar',
+          defaultDock: 'left',
+          defaultRect: {left: 12, top: 54, width: 330, height: 650}
+        },
+        {
+          id: 'search',
+          title: 'Search',
+          selector: '.searchbox',
+          defaultDock: 'top',
+          defaultRect: {left: 360, top: 54, width: 500, height: 360}
+        },
+        {
+          id: 'legend',
+          title: 'Status',
+          selector: '#statusLegend',
+          defaultDock: 'right',
+          defaultRect: {left: 880, top: 54, width: 270, height: 310}
+        },
+        {
+          id: 'drawing',
+          title: 'Drawing Tools',
+          selector: '#markupToolbar',
+          defaultDock: 'bottom',
+          defaultRect: {left: 360, top: 540, width: 700, height: 150}
+        },
+        {
+          id: 'style',
+          title: 'Drawing Style',
+          selector: '.markup-style-panel',
+          defaultDock: 'right',
+          defaultRect: {left: 880, top: 380, width: 270, height: 260}
+        },
+        {
+          id: 'maptools',
+          title: 'Map Tools',
+          selector: '.map-control-panel',
+          defaultDock: 'right',
+          defaultRect: {left: 900, top: 300, width: 220, height: 280}
+        },
+        {
+          id: 'coordinates',
+          title: 'Coordinates',
+          selector: '#coordBox',
+          defaultDock: 'bottom',
+          defaultRect: {left: 370, top: 660, width: 420, height: 120}
+        }
+      ];
+
+      const panels = new Map();
+      let activeDrag = null;
+      let zCounter = 100;
+
+      function createPanel(definition) {
+        const content = document.querySelector(definition.selector);
+        if (!content) return null;
+
+        const wrapper = document.createElement('section');
+        wrapper.className = 'dock-panel';
+        wrapper.dataset.panelId = definition.id;
+        wrapper.tabIndex = 0;
+
+        const titlebar = document.createElement('div');
+        titlebar.className = 'dock-titlebar';
+        titlebar.innerHTML = `
+          <span>${definition.title}</span>
+          <span class="dock-title-actions">
+            <button type="button" data-action="collapse" title="Collapse">—</button>
+            <button type="button" data-action="float" title="Float">◇</button>
+            <button type="button" data-action="close" title="Close">×</button>
+          </span>
+        `;
+
+        const body = document.createElement('div');
+        body.className = 'dock-body';
+
+        content.classList.remove(
+          'mobile-open',
+          'panel-hidden',
+          'ui-window-hidden',
+          'force-visible'
+        );
+        content.style.display = '';
+        content.style.position = 'static';
+        content.style.inset = 'auto';
+        content.style.width = '100%';
+        content.style.height = '100%';
+        content.style.maxWidth = 'none';
+        content.style.maxHeight = 'none';
+        content.style.transform = 'none';
+        content.style.boxShadow = 'none';
+        content.style.border = '0';
+        content.style.borderRadius = '0';
+
+        body.appendChild(content);
+        wrapper.appendChild(titlebar);
+        wrapper.appendChild(body);
+        document.body.appendChild(wrapper);
+
+        const panel = {
+          definition,
+          wrapper,
+          titlebar,
+          body,
+          visible: true,
+          dock: null
+        };
+
+        panels.set(definition.id, panel);
+
+        titlebar.addEventListener('pointerdown', event => {
+          if (event.target.closest('button')) return;
+          startDragging(panel, event);
+        });
+
+        titlebar.addEventListener('dblclick', () => {
+          panel.wrapper.classList.toggle('collapsed');
+          saveLayout();
+        });
+
+        titlebar.querySelector('[data-action="collapse"]').onclick = () => {
+          panel.wrapper.classList.toggle('collapsed');
+          saveLayout();
+        };
+
+        titlebar.querySelector('[data-action="float"]').onclick = () => {
+          floatPanel(panel);
+          saveLayout();
+        };
+
+        titlebar.querySelector('[data-action="close"]').onclick = () => {
+          setPanelVisible(definition.id, false);
+        };
+
+        wrapper.addEventListener('pointerdown', () => {
+          wrapper.style.zIndex = String(++zCounter);
+        });
+
+        applyRect(panel, definition.defaultRect);
+        return panel;
+      }
+
+      function applyRect(panel, rect) {
+        Object.assign(panel.wrapper.style, {
+          left: `${rect.left}px`,
+          top: `${rect.top}px`,
+          width: `${rect.width}px`,
+          height: `${rect.height}px`,
+          right: 'auto',
+          bottom: 'auto'
+        });
+      }
+
+      function floatPanel(panel) {
+        panel.dock = null;
+        panel.wrapper.classList.remove('docked');
+        panel.wrapper.style.zIndex = String(++zCounter);
+
+        const rect = panel.wrapper.getBoundingClientRect();
+        applyRect(panel, {
+          left: Math.max(8, rect.left),
+          top: Math.max(48, rect.top),
+          width: Math.max(220, rect.width),
+          height: Math.max(120, rect.height)
+        });
+      }
+
+      function dockPanel(panel, side) {
+        panel.dock = side;
+        panel.wrapper.classList.add('docked');
+        panel.wrapper.style.zIndex = '85';
+
+        const toolbarHeight = 46;
+        const gap = 0;
+
+        if (side === 'left') {
+          Object.assign(panel.wrapper.style, {
+            left: '0',
+            top: `${toolbarHeight}px`,
+            bottom: '0',
+            right: 'auto',
+            width: '330px',
+            height: `calc(100vh - ${toolbarHeight}px)`
+          });
+        } else if (side === 'right') {
+          Object.assign(panel.wrapper.style, {
+            right: '0',
+            left: 'auto',
+            top: `${toolbarHeight}px`,
+            bottom: '0',
+            width: '290px',
+            height: `calc(100vh - ${toolbarHeight}px)`
+          });
+        } else if (side === 'top') {
+          Object.assign(panel.wrapper.style, {
+            left: '25%',
+            right: '25%',
+            top: `${toolbarHeight}px`,
+            bottom: 'auto',
+            width: '50%',
+            height: '220px'
+          });
+        } else if (side === 'bottom') {
+          Object.assign(panel.wrapper.style, {
+            left: '25%',
+            right: '25%',
+            top: 'auto',
+            bottom: '0',
+            width: '50%',
+            height: '190px'
+          });
+        }
+
+        window.setTimeout(() => map.updateSize(), 0);
+      }
+
+      function startDragging(panel, event) {
+        event.preventDefault();
+        floatPanel(panel);
+
+        const rect = panel.wrapper.getBoundingClientRect();
+        activeDrag = {
+          panel,
+          offsetX: event.clientX - rect.left,
+          offsetY: event.clientY - rect.top
+        };
+
+        panel.wrapper.classList.add('dragging');
+        document.body.classList.add('dock-dragging');
+        panel.titlebar.setPointerCapture(event.pointerId);
+      }
+
+      function dragMove(event) {
+        if (!activeDrag) return;
+        const {panel, offsetX, offsetY} = activeDrag;
+
+        const maxLeft = window.innerWidth - 100;
+        const maxTop = window.innerHeight - 60;
+
+        panel.wrapper.style.left =
+          `${Math.max(0, Math.min(maxLeft, event.clientX - offsetX))}px`;
+        panel.wrapper.style.top =
+          `${Math.max(46, Math.min(maxTop, event.clientY - offsetY))}px`;
+      }
+
+      function detectDockSide(x, y) {
+        const edgeX = Math.max(90, window.innerWidth * .12);
+        const edgeY = Math.max(80, window.innerHeight * .12);
+
+        if (x <= edgeX) return 'left';
+        if (x >= window.innerWidth - edgeX) return 'right';
+        if (y <= edgeY) return 'top';
+        if (y >= window.innerHeight - edgeY) return 'bottom';
+        return null;
+      }
+
+      function dragEnd(event) {
+        if (!activeDrag) return;
+
+        const {panel} = activeDrag;
+        const side = detectDockSide(event.clientX, event.clientY);
+
+        panel.wrapper.classList.remove('dragging');
+        document.body.classList.remove('dock-dragging');
+
+        if (side) dockPanel(panel, side);
+
+        activeDrag = null;
+        saveLayout();
+      }
+
+      document.addEventListener('pointermove', dragMove);
+      document.addEventListener('pointerup', dragEnd);
+      document.addEventListener('pointercancel', dragEnd);
+
+      function setPanelVisible(id, visible) {
+        const panel = panels.get(id);
+        if (!panel) return;
+
+        panel.visible = visible;
+        panel.wrapper.style.display = visible ? '' : 'none';
+
+        const checkbox = document.querySelector(
+          `input[data-dock-panel="${id}"]`
+        );
+        if (checkbox) checkbox.checked = visible;
+
+        saveLayout();
+        window.setTimeout(() => map.updateSize(), 0);
+      }
+
+      function serializeLayout() {
+        const result = {};
+
+        panels.forEach((panel, id) => {
+          const rect = panel.wrapper.getBoundingClientRect();
+          result[id] = {
+            visible: panel.visible,
+            dock: panel.dock,
+            collapsed: panel.wrapper.classList.contains('collapsed'),
+            rect: {
+              left: rect.left,
+              top: rect.top,
+              width: rect.width,
+              height: rect.height
+            }
+          };
+        });
+
+        return result;
+      }
+
+      function saveLayout() {
+        const layout = serializeLayout();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
+        document.getElementById('dockWorkspaceStatus').textContent = 'Custom';
+        document.getElementById('workspacePreset').value = 'custom';
+      }
+
+      function loadLayout() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+
+        try {
+          const layout = JSON.parse(raw);
+
+          Object.entries(layout).forEach(([id, state]) => {
+            const panel = panels.get(id);
+            if (!panel) return;
+
+            panel.visible = state.visible !== false;
+            panel.wrapper.style.display = panel.visible ? '' : 'none';
+            panel.wrapper.classList.toggle('collapsed', state.collapsed === true);
+
+            if (state.dock) {
+              dockPanel(panel, state.dock);
+            } else if (state.rect) {
+              floatPanel(panel);
+              applyRect(panel, state.rect);
+            }
+
+            const checkbox = document.querySelector(
+              `input[data-dock-panel="${id}"]`
+            );
+            if (checkbox) checkbox.checked = panel.visible;
+          });
+
+          document.getElementById('workspacePreset').value = 'custom';
+          document.getElementById('dockWorkspaceStatus').textContent = 'Custom';
+          return true;
+        } catch (error) {
+          console.warn('Could not restore dock layout.', error);
+          return false;
+        }
+      }
+
+      const workspaceDefinitions = {
+        construction: {
+          visible: ['layers', 'search', 'legend', 'coordinates'],
+          docks: {
+            layers: 'left',
+            search: 'top',
+            legend: 'right',
+            coordinates: 'bottom'
+          }
+        },
+        markup: {
+          visible: ['layers', 'drawing', 'style', 'coordinates'],
+          docks: {
+            layers: 'left',
+            drawing: 'bottom',
+            style: 'right',
+            coordinates: 'bottom'
+          }
+        },
+        qaqc: {
+          visible: ['layers', 'search', 'legend', 'maptools', 'coordinates'],
+          docks: {
+            layers: 'left',
+            search: 'top',
+            legend: 'right',
+            maptools: 'right',
+            coordinates: 'bottom'
+          }
+        },
+        field: {
+          visible: ['layers', 'maptools', 'coordinates'],
+          docks: {
+            layers: 'left',
+            maptools: 'right',
+            coordinates: 'bottom'
+          }
+        },
+        minimal: {
+          visible: [],
+          docks: {}
+        }
+      };
+
+      function applyWorkspace(name) {
+        const workspace = workspaceDefinitions[name];
+        if (!workspace) return;
+
+        panels.forEach((panel, id) => {
+          setPanelVisible(id, workspace.visible.includes(id));
+          panel.wrapper.classList.remove('collapsed');
+
+          if (workspace.docks[id]) {
+            dockPanel(panel, workspace.docks[id]);
+          } else {
+            floatPanel(panel);
+          }
+        });
+
+        document.getElementById('dockWorkspaceStatus').textContent =
+          document.querySelector(
+            `#workspacePreset option[value="${name}"]`
+          )?.textContent || name;
+
+        localStorage.setItem('kmzViewerWorkspacePreset', name);
+        localStorage.removeItem(STORAGE_KEY);
+        window.setTimeout(() => map.updateSize(), 0);
+      }
+
+      panelDefinitions.forEach(createPanel);
+
+      document.querySelectorAll('input[data-dock-panel]').forEach(input => {
+        input.addEventListener('change', () => {
+          setPanelVisible(input.dataset.dockPanel, input.checked);
+        });
+      });
+
+      document.getElementById('dockPanelsBtn').onclick = event => {
+        event.stopPropagation();
+        document.getElementById('dockMenu').classList.toggle('open');
+      };
+
+      document.addEventListener('click', event => {
+        const menu = document.getElementById('dockMenu');
+        const button = document.getElementById('dockPanelsBtn');
+        if (!menu.contains(event.target) && event.target !== button) {
+          menu.classList.remove('open');
+        }
+      });
+
+      document.getElementById('applyWorkspaceBtn').onclick = () => {
+        const name = document.getElementById('workspacePreset').value;
+        if (name === 'custom') {
+          loadLayout();
+        } else {
+          applyWorkspace(name);
+        }
+      };
+
+      document.getElementById('saveLayoutBtn').onclick = () => {
+        saveLayout();
+        status('Dock layout saved in this browser.');
+      };
+
+      document.getElementById('resetLayoutBtn').onclick = () => {
+        localStorage.removeItem(STORAGE_KEY);
+        applyWorkspace('construction');
+        status('Dock layout reset.');
+      };
+
+      document.getElementById('floatAllBtn').onclick = () => {
+        let offset = 0;
+        panels.forEach(panel => {
+          setPanelVisible(panel.definition.id, true);
+          floatPanel(panel);
+          applyRect(panel, {
+            left: 20 + offset,
+            top: 60 + offset,
+            width: panel.definition.defaultRect.width,
+            height: panel.definition.defaultRect.height
+          });
+          offset += 28;
+        });
+        saveLayout();
+      };
+
+      document.getElementById('dockDefaultBtn').onclick = () => {
+        applyWorkspace('construction');
+      };
+
+      const savedPreset =
+        localStorage.getItem('kmzViewerWorkspacePreset') || 'construction';
+
+      if (!loadLayout()) {
+        applyWorkspace(savedPreset in workspaceDefinitions
+          ? savedPreset
+          : 'construction');
+      }
+
+      window.viewerDockManager = {
+        panels,
+        setPanelVisible,
+        dockPanel: (id, side) => {
+          const panel = panels.get(id);
+          if (panel) dockPanel(panel, side);
+        },
+        floatPanel: id => {
+          const panel = panels.get(id);
+          if (panel) floatPanel(panel);
+        },
+        applyWorkspace,
+        saveLayout,
+        loadLayout
+      };
+    })();
+
+  </script>
+
+  <script>
     window.addEventListener('error', event => {
       console.error('Viewer error:', event.error || event.message);
       const statusElement = document.getElementById('status');
@@ -3313,5 +4881,268 @@
     });
   </script>
 
+<script>
+    // Revision 23.2 compact labels and My Maps-like search enhancement
+    (function enhanceCompactUIAndSearch() {
+      const replacements = new Map([
+        ['Add layer', 'Add'],
+        ['Open Parent', 'Parent'],
+        ['Change Endpoint', 'Endpoint'],
+        ['Reload 20260718A', 'Reload'],
+        ['Load Latest', 'Latest'],
+        ['Upload KMZ / KML', 'Upload'],
+        ['Fit all layers', 'Fit'],
+        ['Expand all', 'Expand'],
+        ['Collapse all', 'Collapse'],
+        ['Preview', 'View']
+      ]);
+
+      document.querySelectorAll('button').forEach(button => {
+        const text = button.textContent.replace(/\s+/g, ' ').trim();
+        if (replacements.has(text)) {
+          const shortText = replacements.get(text);
+          button.textContent = shortText;
+          button.title = text;
+          button.setAttribute('aria-label', text);
+        }
+      });
+
+      const input = document.querySelector(
+        '.searchbox input[type="search"], .searchbox input[type="text"], #searchInput'
+      );
+      const resultsHost =
+        document.querySelector('#searchResults, .search-results') ||
+        document.querySelector('.searchbox');
+
+      if (!input || !resultsHost) return;
+
+      input.placeholder = 'Search map';
+      input.autocomplete = 'off';
+
+      let activeIndex = -1;
+      let rows = [];
+
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function highlight(value, query) {
+        const safe = escapeHtml(value);
+        if (!query) return safe;
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return safe.replace(new RegExp(`(${escaped})`, 'ig'), '<mark>$1</mark>');
+      }
+
+      function layerCode(name) {
+        const match = String(name || '').match(/^(\d{3})/);
+        return match ? match[1] : 'MAP';
+      }
+
+      function featureTitle(feature) {
+        const props = feature.getProperties ? feature.getProperties() : {};
+        const candidates = [
+          props.name, props.Name, props.NAME,
+          props.id, props.ID,
+          props.asset, props.Asset,
+          props.slab_id, props['Slab ID'],
+          props.description, props.Description
+        ];
+        return candidates.find(v => v !== undefined && v !== null && String(v).trim())
+          || 'Untitled feature';
+      }
+
+      function featureSubtitle(feature) {
+        const props = feature.getProperties ? feature.getProperties() : {};
+        const candidates = [
+          props.Type, props.type,
+          props.StatusA, props.status,
+          props.description, props.Description
+        ];
+        return candidates.find(v => v !== undefined && v !== null && String(v).trim())
+          || '';
+      }
+
+      function getSearchableItems(query) {
+        const q = query.trim().toLowerCase();
+        if (!q) return [];
+
+        const items = [];
+        if (typeof map === 'undefined') return items;
+
+        map.getLayers().forEach(layer => {
+          const source = layer.getSource && layer.getSource();
+          if (!source || !source.getFeatures) return;
+
+          const layerName =
+            layer.get('title') || layer.get('name') || layer.get('filename') || 'Layer';
+          const code = layerCode(layerName);
+
+          source.getFeatures().forEach(feature => {
+            const props = feature.getProperties ? feature.getProperties() : {};
+            const searchable = Object.entries(props)
+              .filter(([key]) => key !== 'geometry')
+              .map(([, value]) => String(value ?? ''))
+              .join(' ')
+              .toLowerCase();
+
+            if (!searchable.includes(q) && !String(layerName).toLowerCase().includes(q)) {
+              return;
+            }
+
+            items.push({
+              layer,
+              feature,
+              layerName,
+              code,
+              title: featureTitle(feature),
+              subtitle: featureSubtitle(feature)
+            });
+          });
+        });
+
+        return items.slice(0, 120);
+      }
+
+      function zoomToItem(item) {
+        const geometry = item.feature.getGeometry && item.feature.getGeometry();
+        if (!geometry) return;
+
+        const extent = geometry.getExtent();
+        map.getView().fit(extent, {
+          padding: [80, 80, 80, 80],
+          maxZoom: 19,
+          duration: 350
+        });
+
+        if (typeof showFeaturePopup === 'function') {
+          try { showFeaturePopup(item.feature, item.layer); } catch (_) {}
+        }
+      }
+
+      function previewItem(item) {
+        if (typeof highlightFeature === 'function') {
+          try { highlightFeature(item.feature, item.layer); return; } catch (_) {}
+        }
+
+        const geometry = item.feature.getGeometry && item.feature.getGeometry();
+        if (geometry && typeof map !== 'undefined') {
+          const extent = geometry.getExtent();
+          if (extent && extent.every(Number.isFinite)) {
+            map.getView().fit(extent, {
+              padding: [140, 140, 140, 140],
+              maxZoom: 18,
+              duration: 120
+            });
+          }
+        }
+      }
+
+      function render(query) {
+        const items = getSearchableItems(query);
+        rows = [];
+        activeIndex = -1;
+
+        let host = document.querySelector('#searchResults, .search-results');
+        if (!host || host === document.querySelector('.searchbox')) {
+          host = document.createElement('div');
+          host.id = 'searchResults';
+          host.className = 'search-results';
+          input.closest('.searchbox').appendChild(host);
+        }
+
+        host.innerHTML = '';
+
+        if (!query.trim()) {
+          host.style.display = 'none';
+          return;
+        }
+
+        host.style.display = 'block';
+
+        if (!items.length) {
+          host.innerHTML = '<div class="mymaps-search-empty">No results</div>';
+          return;
+        }
+
+        const grouped = new Map();
+        items.forEach(item => {
+          if (!grouped.has(item.layerName)) grouped.set(item.layerName, []);
+          grouped.get(item.layerName).push(item);
+        });
+
+        grouped.forEach((groupItems, layerName) => {
+          const header = document.createElement('div');
+          header.className = 'mymaps-search-group';
+          header.textContent = `${layerCode(layerName)} · ${layerName.replace(/^\d{3}[-_\s]*/, '')}`;
+          host.appendChild(header);
+
+          groupItems.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'mymaps-search-row';
+            row.tabIndex = -1;
+
+            const iconHtml = item.code === '001'
+              ? '<img src="layer-001-lightning.png" alt="">'
+              : '<span>●</span>';
+
+            row.innerHTML = `
+              <div class="mymaps-search-icon">${iconHtml}</div>
+              <div class="mymaps-search-main">
+                <div class="mymaps-search-title">${highlight(item.title, query)}</div>
+                <div class="mymaps-search-subtitle">${highlight(item.subtitle, query)}</div>
+              </div>
+              <div class="mymaps-search-badge">${item.code}</div>
+            `;
+
+            row.addEventListener('mouseenter', () => previewItem(item));
+            row.addEventListener('click', () => zoomToItem(item));
+
+            host.appendChild(row);
+            rows.push({element: row, item});
+          });
+        });
+      }
+
+      let timer = null;
+      input.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => render(input.value), 90);
+      });
+
+      input.addEventListener('keydown', event => {
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          activeIndex = Math.min(rows.length - 1, activeIndex + 1);
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          activeIndex = Math.max(0, activeIndex - 1);
+        } else if (event.key === 'Enter' && activeIndex >= 0 && rows[activeIndex]) {
+          event.preventDefault();
+          zoomToItem(rows[activeIndex].item);
+        } else if (event.key === 'Escape') {
+          const host = document.querySelector('#searchResults, .search-results');
+          if (host) host.style.display = 'none';
+          input.blur();
+          return;
+        } else {
+          return;
+        }
+
+        rows.forEach((entry, index) => {
+          entry.element.classList.toggle('active', index === activeIndex);
+        });
+
+        if (rows[activeIndex]) {
+          rows[activeIndex].element.scrollIntoView({block: 'nearest'});
+          previewItem(rows[activeIndex].item);
+        }
+      });
+    })();
+</script>
 </body>
 </html>
