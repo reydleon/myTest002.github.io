@@ -4007,8 +4007,10 @@
     document.getElementById('baseGalleryBtn').onclick = () => document.getElementById('baseGallery').classList.toggle('open');
     document.getElementById('closeBaseGallery').onclick = () => document.getElementById('baseGallery').classList.remove('open');
 
-    const savedBase = localStorage.getItem('kmzViewerBaseMap') || 'hybrid';
-    setBaseMap(savedBase);
+    const savedBase = localStorage.getItem('kmzViewerBaseMap');
+    // 'hybrid' was a legacy default with no matching basemap layer.
+    // Always start with a real satellite tile layer when no valid selection exists.
+    setBaseMap(Object.prototype.hasOwnProperty.call(extraBaseLayers, savedBase) ? savedBase : 'satellite');
 
     map.on('pointermove', evt => {
       const lonlat = ol.proj.toLonLat(evt.coordinate);
