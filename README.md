@@ -527,3 +527,9 @@ Startup continues to load `20260718A` automatically.
 **Review item (not a confirmed defect):** Review the large single-file HTML bundle for maintainability, loading speed, accessibility, and mobile performance.
 
 **Verification status:** Static review only; automated tests, dependency scanning, and production deployment checks have not been completed. Prioritize validation before treating this item as resolved. This note does not imply that a live defect has been reproduced.
+
+## Language and architecture
+
+- **Primary language:** HTML.
+- **Implementation classification:** Non-Python primary language.
+- **Verification:** Primary language is based on GitHub language-filtered repository search (2026-11-14). Architecture notes are based on existing README documentation; source-level class verification remains pending unless explicitly documented above.
