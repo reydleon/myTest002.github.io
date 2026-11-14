@@ -1467,6 +1467,8 @@
       </select>
     </div>
 
+    <div id="driveKmzDiagnostics" hidden role="status" aria-live="polite" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;padding:6px 10px;color:#9b2c2c;max-height:120px;overflow:auto;"></div>
+
     <div class="drive-layer-filter">
       <label for="drivePrimaryLayersOnly">
         <input id="drivePrimaryLayersOnly" type="checkbox" />
@@ -2958,6 +2960,8 @@
         `Selected Drive folder ${manifest.selectedFolder || getSelectedDriveFolderId()}; loading ${files.length} KMZ files...`
       );
 
+      const diagnostic = document.getElementById('driveKmzDiagnostics');
+      if (diagnostic) { diagnostic.hidden = true; diagnostic.textContent = ''; }
       let loadedCount = 0;
       const failures = [];
 
@@ -3004,6 +3008,14 @@
           `${failures.length} failed.`
         );
         console.warn(`Folder ${manifest.selectedFolder}: ${loadedCount}/${files.length} KMZ files loaded. Failures: ${failures.join('; ')}`);
+        // Show actionable per-file diagnostics in the UI, not only in DevTools.
+        const details = failures.join(' | ');
+        const diagnostic = document.getElementById('driveKmzDiagnostics');
+        if (diagnostic) {
+          diagnostic.textContent = failures.join('\n');
+          diagnostic.hidden = false;
+        }
+        status(`KMZ load failed: ${details.slice(0, 260)}`);
       } else if (primaryOnly) {
         const missingPrimaryCodes = DRIVE_PRIMARY_LAYER_CODES.filter(
           code => !foundPrimaryCodes.has(code)
