@@ -521,3 +521,9 @@ https://script.google.com/macros/s/AKfycbzwAMTdGpoa6lehJkw26H2csg0xJj26iJjr9eYqw
 ```
 
 Startup continues to load `20260718A` automatically.
+
+## Preliminary internal code audit (2026-11-13)
+
+**Review item (not a confirmed defect):** Review the large single-file HTML bundle for maintainability, loading speed, accessibility, and mobile performance.
+
+**Verification status:** Static review only; automated tests, dependency scanning, and production deployment checks have not been completed. Prioritize validation before treating this item as resolved. This note does not imply that a live defect has been reproduced.
