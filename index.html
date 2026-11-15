@@ -1400,6 +1400,21 @@
 @media (max-width:380px){.markup-toolbar{width:min(256px,calc(100vw - 20px))!important}}
 @media (prefers-reduced-motion:reduce){.sidebar{transition:none!important}}
 
+
+/* Android viewport regression fix: desktop 75% zoom shrank the map canvas. */
+@media (max-width:760px){
+ html{zoom:1!important;width:100%!important;height:100%!important}
+ body{width:100%!important;height:100%!important;margin:0!important;overflow:hidden!important}
+ #map{position:fixed!important;inset:0!important;width:100%!important;height:100vh!important;height:100dvh!important;min-height:100dvh!important}
+ #dockToolbar,#dockMenu,.dock-zone,.dock-panel:not(#sidebar){display:none!important}
+ .popup{width:min(88vw,340px)!important;max-width:88vw!important;max-height:min(35dvh,300px)!important;overflow:auto!important;padding:10px!important;font-size:12px!important}
+ .popup-close{width:44px!important;height:44px!important;right:0!important;top:0!important}
+ .popup table{font-size:11px!important}
+ .popup td{padding:4px 3px!important;overflow-wrap:anywhere}
+ .ol-zoom{top:calc(max(10px,env(safe-area-inset-top)) + 64px)!important;left:max(10px,env(safe-area-inset-left))!important}
+ .ol-zoom button{min-width:44px;min-height:44px}
+}
+
 </style>
 </head>
 <body>
